@@ -4,6 +4,7 @@ class PlugLead:
         mapping = mapping.upper()
         from_char = mapping[0]
         to_char = mapping[1]
+        # Create a dictionary with back and forth
         self.letter_encode = {from_char: to_char, to_char: from_char}
 
     def encode(self, character):
@@ -13,16 +14,10 @@ class PlugLead:
         return out_character
 
 
-# class Plugboard:
-# Your code here
-# raise NotImplementedError()
-
-
-# You will need to write more classes, which can be done here or in separate files, you choose.
-
 
 if __name__ == "__main__":
     pass
+
 # You can use this section to write tests and demonstrations of your enigma code.
 #   pluglead1 = PlugLead("AS")
 #   print(pluglead1.encode("T"))
