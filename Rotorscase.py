@@ -1,4 +1,6 @@
 from Rotor import *
+
+
 class Rotorscase:
 
     def __init__(self):
@@ -33,7 +35,6 @@ class Rotorscase:
                 can_rotate = False
             if self.debug_mode:
                 print(f"rotor {rotor.eType} is now on position {Rotor.num2Char(rotor.pos)}")
-
 
     def __reset_rotor(self):
         for  rotor in self.rotors:
@@ -71,13 +72,11 @@ class Rotorscase:
         self.rotors = []
         self.num_rotors = 0
 
-
     def set_rotor_initial_positions(self,positions):
         positions.reverse()
         for idx, pos in enumerate(positions):
             rotor = self.rotors[idx]
-            rotor.set_intial_position(pos)
-
+            rotor.set_initial_position(pos)
 
     def set_rotor_initial_ring_setting(self,ring_set):
         ring_set.reverse()

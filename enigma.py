@@ -83,84 +83,76 @@ class EnigmaMachine:
 
 
 if __name__ == '__main__':
-    """
+
     em0 = EnigmaMachine()
-    em0.add_rotor("IV",   "Z",   19)
-    em0.add_rotor("III",  "V",   15)
-    em0.add_rotor("II",   "E",   11)
-    em0.add_rotor("I",    "Q",   7)
-    em0.add_reflector("C")
-    encoded_string = em0.encode("Z")
+    em0.add_rotors(["I", "II", "III"])
+    em0.set_rotor_initial_pos(["A", "A", "Z"])
+    em0.set_rotor_ring_setting([1, 1, 1])
+    em0.add_reflector("B")
+    encoded_string = em0.encode("A")
     print(encoded_string)
-    """
-    """
+
+
     em1 = EnigmaMachine()
-    #em.add_rotor("IV",   "Z",   19)
-    em1.add_rotor("III",  "Z",   1)
-    em1.add_rotor("II",   "A",   1)
-    em1.add_rotor("I",    "A",   1)
+    em1.add_rotors(["I", "II", "III"])
+    em1.set_rotor_initial_pos(["A", "A", "A"])
+    em1.set_rotor_ring_setting([1, 1, 1])
     em1.add_reflector("B")
-    em1.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
-    encoded_string = em1.encode("HELLOWORLD")
-    #encoded_string = em1.encode("IVQYPNWYBCEXPOXCIPIUSHCZBNGBYS")
-    print(encoded_string)
-    """
-    """
-    em = EnigmaMachine()
-    em.add_rotor("IV", "Z", 19)
-    em.add_rotor("III", "V", 15)
-    em.add_rotor("II", "E", 11)
-    em.add_rotor("I", "Q", 7)
-    em.add_reflector("C")
-    encoded_string = em.encode("Z")
-    print(encoded_string)
-
-    em1 = EnigmaMachine()
-    em1.add_rotor("IV", "Z", 19)
-    em1.add_rotor("III", "V", 15)
-    em1.add_rotor("II", "E", 11)
-    em1.add_rotor("I", "Q", 7)
-    em1.add_reflector("C")
-    encoded_string = em1.encode("Z")
+    encoded_string = em1.encode("A")
     print(encoded_string)
 
 
-    
     em2 = EnigmaMachine()
-    em2.add_rotor("I",    "P", 5)
-    em2.add_rotor("Beta", "G", 3)
-    em2.add_rotor("V",    "Z", 24)
-    em2.add_rotor("IV",   "E", 18)
-    em2.add_reflector("A")
-    em2.insert_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
-    encoded_string = em2.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
+    em2.add_rotors(["I", "II", "III"])
+    em2.set_rotor_initial_pos(["Q", "E", "V"])
+    em2.set_rotor_ring_setting([1, 1, 1])
+    em2.add_reflector("B")
+    encoded_string = em2.encode("A")
     print(encoded_string)
-    """
 
-    """
-    em3 = EnigmaMachine()
-    em3.add_rotors(["IV", "V", "Beta", "I"])
-    em3.set_rotor_initial_pos(["E", "Z", "G", "P"])
-    em3.set_rotor_ring_setting([18, 24, 3, 5])
-    em3.add_reflector("A")
-    em3.insert_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
-    encoded_string = em3.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
-    print(encoded_string)
-    """
 
     em3 = EnigmaMachine()
-    em3.add_rotors(["IV", "V", "Beta", "I"])
-    em3.set_rotor_initial_pos(["E", "Z", "G", "P"])
-    em3.set_rotor_ring_setting([18, 24, 3, 5])
-    em3.add_reflector("A")
-    em3.reflector.swap_wiring([('Y', 'A'), ('R', 'B'), ('U', 'C'), ('H', 'D'), ('Q', 'E'), ('S', 'F'), ('L', 'G'), ('D', 'H'), ('P', 'I'), ('X', 'J'), ('N', 'K'), ('G', 'L'), ('O', 'M'), ('K', 'N'), ('M', 'O'), ('I', 'P'), ('E', 'Q'), ('B', 'R'), ('F', 'S'), ('Z', 'T'), ('C', 'U'), ('W', 'V'), ('V', 'W'), ('J', 'X'), ('A', 'Y'), ('T', 'Z')])
-    em3.insert_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
-    encoded_string = em3.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
-    print(em3.reflector.wiring_type)
+    em3.add_rotors(["IV", "V", "Beta"])
+    em3.set_rotor_initial_pos(["A", "A", "A"])
+    em3.set_rotor_ring_setting([14, 9, 24])
+    em3.add_reflector("B")
+    encoded_string = em3.encode("H")
     print(encoded_string)
 
+    em4 = EnigmaMachine()
+    em4.add_rotors(["I", "II", "III", "IV"])
+    em4.set_rotor_initial_pos(["Q", "E", "V", "Z"])
+    em4.set_rotor_ring_setting([7, 11, 15, 19])
+    em4.add_reflector("C")
+    encoded_string = em4.encode("Z")
+    print(encoded_string)
+
+
+
+    em5 = EnigmaMachine()
+    em5.add_rotors(["I", "II", "III"])
+    em5.set_rotor_initial_pos(["A", "A", "Z"])
+    em5.set_rotor_ring_setting([1, 1, 1])
+    em5.add_reflector("B")
+    em5.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
+    encoded_string = em5.encode("HELLOWORLD")
+    print(encoded_string)
+
+
+    em6 = EnigmaMachine()
+    em6.add_rotors(["IV", "V", "Beta", "I"])
+    em6.set_rotor_initial_pos(["E", "Z", "G", "P"])
+    em6.set_rotor_ring_setting([18, 24, 3, 5])
+    em6.add_reflector("A")
+    em6.insert_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
+    encoded_string = em6.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
+    print(encoded_string)
+
+
+    """
     em3.reflector.reset_std_wiring()
     em3.reset_default_rotor_position()
     encoded_string = em3.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     print(em3.reflector.wiring_type)
     print(encoded_string)
+    """

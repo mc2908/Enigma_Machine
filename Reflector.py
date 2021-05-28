@@ -4,25 +4,22 @@ from enum import Enum
 class Reflector:
 
     def __init__(self, etype, wiring):
-        self.wiring = wiring
+        self.wiring = dict(wiring)
         self.wiring_type = WiringType.Std
         self.eType = etype
 
     def encode(self, char_in):
         char_in = char_in.upper()
-        right_char_list = [right_char for _, right_char in self.wiring]
-        char_idx = right_char_list.index(char_in)
-        out_contact, in_contact = self.wiring[char_idx]
+        out_contact = self.wiring[char_in]
         return out_contact
 
     def swap_wiring(self, new_wiring):
-        self.wiring = new_wiring
+        self.wiring = dict(new_wiring)
         self.wiring_type = WiringType.Mod
 
     def reset_std_wiring(self):
-        self.wiring = get_wiring_by_ReflectorType(self.eType)
+        self.wiring = dict(get_wiring_by_ReflectorType(self.eType))
         self.wiring_type = WiringType.Std
-
 
 
 class ReflectorType(Enum):
@@ -31,10 +28,12 @@ class ReflectorType(Enum):
     B = 2
     C = 3
 
+
 class WiringType(Enum):
     ND = 0
     Std = 1
     Mod = 2
+
 
 def reflectorType_from_name(rotor_name):
     if rotor_name == "A":

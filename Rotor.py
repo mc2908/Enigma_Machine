@@ -9,8 +9,9 @@ class Rotor:
         self.default_pos = 0                        # Rotor default position (set when the rotor is first added)
         self.ringSet = 0                            # Rotor ring setting
         self.eType = etype                          # Rotor Type
-        self.wiring = wiring                        # Rotor wiring  <tuple(<string>,<string>)>
-        self.s_Notch = notch                        # Rortor notch  <string>
+        self.wiring = [dict([(t[1], t[0]) for t in wiring])]
+        self.wiring.append(dict(wiring))            # Rotor wiring  <tuple(<string>,<string>)>
+        self.s_Notch = notch                        # Rotor notch  <string>
         self.num_Notch = Rotor.char2num(notch)      # Rotor notch <integer>
         self.left_rotor = None                      # Rotor on the left side
         self.right_rotor = None                     # Rotor on the right side
@@ -52,13 +53,10 @@ class Rotor:
 
     def encode_right_to_left(self, char_in):
         char_in = char_in.upper()
-        # get the list of right contacts
-        right_contacts = [right_char for _, right_char in self.wiring]
         # get the correct right contact alignment considering position and ring setting
         _, right_contact = self.adjust_rotor_contact_right_to_left(char_in)
         # get the
-        wire_map_idx = right_contacts.index(right_contact)
-        left_contact, _ = self.wiring[wire_map_idx]
+        left_contact = self.wiring[0][right_contact]
         if self.is_leftmost_rotor():
             # the last rotor needs to pass adjusted contact information to the reflector because the reflector does not
             # know anything about the position of the rotors
@@ -67,11 +65,9 @@ class Rotor:
 
     def encode_left_to_right(self, char_in):
         char_in = char_in.upper()
-        left_contacts = [left_char for left_char, _ in self.wiring]
         # get the list of right contacts
         _, left_contact = self.adjust_rotor_contact_left_to_right(char_in)
-        wire_map_idx = left_contacts.index(left_contact)
-        _, right_contact = self.wiring[wire_map_idx]
+        right_contact = self.wiring[1][left_contact]
         if self.is_rightmost_rotor():
             right_contact = Rotor.num2Char((Rotor.char2num(right_contact) - self.pos + self.ringSet) % 26)
         return right_contact
@@ -87,20 +83,14 @@ class Rotor:
         return contact_idx, contact
 
     def adjust_rotor_contact_left_to_right(self, char_in):
-        pos_left_rotor = 0
-        ringSet_left_rotor = 0
+        left_rotor_pos = 0
+        left_rotor_ring_set = 0
         if not self.is_leftmost_rotor():
-            pos_left_rotor = self.left_rotor.pos
-            ringSet_left_rotor = self.left_rotor.ringSet
-        contact_idx = (Rotor.char2num(char_in) + self.pos - self.ringSet - pos_left_rotor + ringSet_left_rotor) % 26
+            left_rotor_pos = self.left_rotor.pos
+            left_rotor_ring_set = self.left_rotor.ringSet
+        contact_idx = (Rotor.char2num(char_in) + self.pos - self.ringSet - left_rotor_pos + left_rotor_ring_set) % 26
         contact = Rotor.num2Char(contact_idx)
         return contact_idx, contact
-
-    def set_next_rotor(self, rotor):
-        self.nextRotor = rotor
-
-    def set_previous_rotor(self, rotor):
-        self.nextRotor = rotor
 
     def is_at_notch(self):
         return self.num_Notch == self.pos

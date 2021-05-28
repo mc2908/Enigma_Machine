@@ -212,7 +212,7 @@ def join_iterable_2_Tuple(iterable):
 
 
 if __name__ == '__main__':
-    """
+
     CC1 = CodeCraking()
     CC1.rotors_name = [["Beta"], ["Gamma"], ["V"]]
     CC1.rotors_positions = [["M"], ["J"], ["M"]]
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     CC2.calculate_total_combination()
     crakedstring, score = CC2.crack_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH", ["UNIVERSITY"])
     print(f"the decoded messages is {crakedstring} with a score of {score}")
-    """
+
 
 
     CC3 = CodeCraking()
@@ -245,7 +245,7 @@ if __name__ == '__main__':
     #SQUIRRELSPLANTTHOUSANDSOFNEWTREESEACHYEARBYMERELYFORGETTINGWHERETHEYPUTTHEIRACORNS
 
 
-    """
+
     CC4 = CodeCraking()
     CC4.rotors_name = [["V"], ["III"], ["IV"]]
     CC4.rotors_ring_setting = [[24], [12], [10]]
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     CC5.calculate_total_combination()
     crakedstring, score = CC5.crack_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX", ["FACEBOOK", "TWITTER", "INSTAGRAM", "LINKEDIN", "YOUTUBE"])
     print(f"the decoded messages is {crakedstring} with a score of {score}")
-    """
+
 
     #gen = reflector_wiring_comb_gen([('Y', 'A'), ('R', 'B'), ('U', 'C'), ('H', 'D'), ('Q', 'E'), ('S', 'F'), ('L', 'G'), ('D', 'H'), ('P', 'I'), ('X', 'J'), ('N', 'K'), ('G', 'L'), ('O', 'M'), ('K', 'N'), ('M', 'O'), ('I', 'P'), ('E', 'Q'), ('B', 'R'), ('F', 'S'), ('Z', 'T'), ('C', 'U'), ('W', 'V'), ('V', 'W'), ('J', 'X'), ('A', 'Y'), ('T', 'Z')], 4)
 

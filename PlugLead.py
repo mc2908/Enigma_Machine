@@ -14,10 +14,8 @@ class PlugLead:
         return out_character
 
 
-
 if __name__ == "__main__":
     pass
-
 # You can use this section to write tests and demonstrations of your enigma code.
 #   pluglead1 = PlugLead("AS")
 #   print(pluglead1.encode("T"))
