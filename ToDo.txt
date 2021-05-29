@@ -1,0 +1,16 @@
+Remaining Tasks:
+
+Commenting code throughout:
+        Rotor
+        RotorCase
+        Enigma
+        Plugboard
+        Pluglead
+        code_cracking
+On Crack_code instead of returing the full list or reflector wiring, return only the differences with respec the standard configurations.
+Think of changin file names from capital case to lwoer case
+        Rotor --> rotor
+        Reflector --> reflector
+        PlugLead --> pluglead
+        Plugboard --> pluglead
+        Rotorcase --> rotorcase
