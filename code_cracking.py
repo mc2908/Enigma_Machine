@@ -67,41 +67,36 @@ class CodeCraking:
         # calculate plugboard combination
         self.plugboard_connection_comb = plugboard_combinations_gen(self.plugboard_connection, self.available_plugs)
 
-
-
-
-
-
     def crack_code(self,encoded_string,crib_list):
         decoded_string_DB = {}
+        settings_DB = {}
         this_string = encoded_string.upper()
         crib_list = list(map(lambda l: l.upper(), crib_list))
         print(f"number of total possible combination  = {len(self.rotor_name_comb)*len(self.rotor_pos_comb)*len(self.rotor_ring_setting_comb)* len(self.reflectors_comb)}")
         for plug_setting in self.plugboard_connection_comb:
             self.em.remove_plugleads()
             self.em.insert_plugleads(plug_setting)
-            for rotors in self.rotor_name_comb:
-                self.em.remove_rotors()
-                self.em.add_rotors(list(rotors))
-                for pos in self.rotor_pos_comb:
-                    self.em.set_rotor_initial_pos(list(pos))
-                    for setting in self.rotor_ring_setting_comb:
-                        self.em.set_rotor_ring_setting(list(setting))
-                        for idx, reflector in enumerate(self.reflectors_comb):
-                            r = reflector
-                            self.em.replace_reflector(r)
-                            reflector_wiring_comb = self.reflector_wiring_comb[idx]
-                            for reflector_wiring in reflector_wiring_comb_gen(get_wiring_by_ReflectorType(reflectorType_from_name(r)), self.pairs_to_swap):
-                                self.em.reflector.swap_wiring(reflector_wiring)
+            for reflector in self.reflectors_comb:
+                self.em.replace_reflector(reflector)
+                for reflector_wiring in reflector_wiring_comb_gen(get_wiring_by_ReflectorType(reflectorType_from_name(reflector)), self.pairs_to_swap):
+                    self.em.reflector.swap_wiring(reflector_wiring)
+                    for rotors in self.rotor_name_comb:
+                        self.em.remove_rotors()
+                        self.em.add_rotors(list(rotors))
+                        for pos in self.rotor_pos_comb:
+                            self.em.set_rotor_initial_pos(list(pos))
+                            for setting in self.rotor_ring_setting_comb:
+                                self.em.set_rotor_ring_setting(list(setting))
                                 self.em.reset_default_rotor_position()
                                 decoded_string = self.em.encode(encoded_string)
                                 for crib in crib_list:
                                     if crib in decoded_string:
-                                        score = self.common_words_analysis(decoded_string)
-                                        decoded_string_DB[decoded_string] = score
+                                        string_score = self.common_words_analysis(decoded_string)
+                                        decoded_string_DB[decoded_string] = string_score
+                                        settings_DB[decoded_string] = [rotors, pos, setting,plug_setting, reflector, reflector_wiring]
         best_score, out_string = max([(v, k) for k, v in decoded_string_DB.items()])
-        return out_string, best_score
-
+        settings = settings_DB[out_string]
+        return out_string, best_score,settings
 
     def common_words_analysis(self,phrase):
         score = 0
@@ -136,6 +131,7 @@ def plugboard_combinations_gen(plugboard_connection, all_available_plugs):
                     new_pair = hlf_term.replace("?", perm_half_pair[idx])
                     out_plug_board_connection[idx_term] = new_pair
                 yield out_plug_board_connection
+
 
 def full_pair_combination_gen(remaining_letters,n):
     POSS2 = itertools.combinations(itertools.combinations(remaining_letters, 2), n)
@@ -180,7 +176,6 @@ def reflector_wiring_comb_gen(std_wiring, n):
         all_left_contacts_unique.append(lc)
     right_contact_to_swap_comb = itertools.combinations(all_right_contacts_unique, n)
     for right_contact in right_contact_to_swap_comb:
-        #old_left_contact = tuple([y for (y, x) in std_wiring if x in right_contact])
         wire_pairs_comb = full_pair_combination_gen(right_contact, 2) #Only swap wires in pairs
         for wire_pairs in wire_pairs_comb:
             new_wiring = std_wiring.copy()
@@ -188,8 +183,7 @@ def reflector_wiring_comb_gen(std_wiring, n):
             for right_contact_pair in wire_pairs:
                 this_wire_pair_left_contact = [y for (y, x) in std_wiring if x in right_contact_pair]
                 new_left_contact.append((this_wire_pair_left_contact[1], this_wire_pair_left_contact[0]))
-            new_conn = list(zip(join_iterable_2_Tuple(new_left_contact), join_iterable_2_Tuple(wire_pairs)))
-            #old_conn = list(zip(join_iterable_2_Tuple(old_left_contact), join_iterable_2_Tuple(wire_pairs)))
+            new_conn = list(zip(join_iterable_2_tuple(new_left_contact), join_iterable_2_tuple(wire_pairs)))
             for conn in new_conn:
                 left_cont, right_cont = conn
                 idx = Rotor.char2num(right_cont)
@@ -201,9 +195,7 @@ def reflector_wiring_comb_gen(std_wiring, n):
             yield new_wiring   # from the second call onwards return the modified wiring
 
 
-
-
-def join_iterable_2_Tuple(iterable):
+def join_iterable_2_tuple(iterable):
     out = ()
     for x, y in iterable:
         out = out + (x,) + (y,)
@@ -219,9 +211,16 @@ if __name__ == '__main__':
     CC1.rotors_ring_setting = [[4], [2], [14]]
     CC1.plugboard_connection = ["KI", "XN", "FL"]
     CC1.calculate_total_combination()
-    crakedstring, score = CC1.crack_code("DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ", ["SECRETS"])
-    print(f"the decoded messages is {crakedstring} with a score of {score}")
-
+    crakedstring, score, settings = CC1.crack_code("DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ", ["SECRETS"])
+    print(f"The decoded messages is {crakedstring} with a score of {score}")
+    print(f"The Enigma Machine settings are:"
+          f" Rotors: {settings[0]}\n"
+          f" Rotor positions: {settings[1]}\n"
+          f" Rotor settings: {settings[2]}\n"
+          f" Plugboard connections: {settings[3]}\n"
+          f" Reflector: {settings[4]}\n"
+          f" Reflector Wiring: {settings[5]}")
+    print("\n")
 
     CC2 = CodeCraking()
     CC2.rotors_name = [["Beta"], ["I"], ["III"]]
@@ -229,9 +228,16 @@ if __name__ == '__main__':
     CC2.reflector_name = ["B"]
     CC2.plugboard_connection = ["VH", "PT", "ZG", "BJ", "EY", "FS"]
     CC2.calculate_total_combination()
-    crakedstring, score = CC2.crack_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH", ["UNIVERSITY"])
-    print(f"the decoded messages is {crakedstring} with a score of {score}")
-
+    crakedstring, score, settings = CC2.crack_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH", ["UNIVERSITY"])
+    print(f"The decoded messages is {crakedstring} with a score of {score}")
+    print(f"The Enigma Machine settings are:"
+          f" Rotors: {settings[0]}\n"
+          f" Rotor positions: {settings[1]}\n"
+          f" Rotor settings: {settings[2]}\n"
+          f" Plugboard connections: {settings[3]}\n"
+          f" Reflector: {settings[4]}\n"
+          f" Reflector Wiring: {settings[5]}")
+    print("\n")
 
 
     CC3 = CodeCraking()
@@ -240,10 +246,16 @@ if __name__ == '__main__':
     CC3.rotors_positions = [["E"], ["M"], ["Y"]]
     CC3.plugboard_connection = ["FH", "TS", "BE", "UQ", "KD", "AL"]
     CC3.calculate_total_combination()
-    crakedstring, score = CC3.crack_code("ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY", ["THOUSANDS"])
+    crakedstring, score, settings = CC3.crack_code("ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY", ["THOUSANDS"])
     print(f"the decoded messages is {crakedstring} with a score of {score}")
-    #SQUIRRELSPLANTTHOUSANDSOFNEWTREESEACHYEARBYMERELYFORGETTINGWHERETHEYPUTTHEIRACORNS
-
+    print(f"The Enigma Machine settings are:"
+          f" Rotors: {settings[0]}\n"
+          f" Rotor positions: {settings[1]}\n"
+          f" Rotor settings: {settings[2]}\n"
+          f" Plugboard connections: {settings[3]}\n"
+          f" Reflector: {settings[4]}\n"
+          f" Reflector Wiring: {settings[5]}")
+    print("\n")
 
 
     CC4 = CodeCraking()
@@ -253,9 +265,16 @@ if __name__ == '__main__':
     CC4.plugboard_connection = ["WP", "RJ", "A?", "VF", "I?", "HN", "CG", "BS"]
     CC4.reflector_name = ["A"]
     CC4.calculate_total_combination()
-    crakedstring, score = CC4.crack_code("SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW", ["TUTOR"])
+    crakedstring, score, settings = CC4.crack_code("SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW", ["TUTOR"])
     print(f"the decoded messages is {crakedstring} with a score of {score}")
-
+    print(f"The Enigma Machine settings are:"
+          f" Rotors: {settings[0]}\n"
+          f" Rotor positions: {settings[1]}\n"
+          f" Rotor settings: {settings[2]}\n"
+          f" Plugboard connections: {settings[3]}\n"
+          f" Reflector: {settings[4]}\n"
+          f" Reflector Wiring: {settings[5]}")
+    print("\n")
 
 
     CC5 = CodeCraking()
@@ -266,9 +285,16 @@ if __name__ == '__main__':
     CC5.allow_reflector_modifications = False
     CC5.pairs_to_swap = 4
     CC5.calculate_total_combination()
-    crakedstring, score = CC5.crack_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX", ["FACEBOOK", "TWITTER", "INSTAGRAM", "LINKEDIN", "YOUTUBE"])
+    crakedstring, score, settings = CC5.crack_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX", ["FACEBOOK", "TWITTER", "INSTAGRAM", "LINKEDIN", "YOUTUBE"])
     print(f"the decoded messages is {crakedstring} with a score of {score}")
-
+    print(f"The Enigma Machine settings are:"
+          f" Rotors: {settings[0]}\n"
+          f" Rotor positions: {settings[1]}\n"
+          f" Rotor settings: {settings[2]}\n"
+          f" Plugboard connections: {settings[3]}\n"
+          f" Reflector: {settings[4]}\n"
+          f" Reflector Wiring: {settings[5]}")
+    print("\n")
 
     #gen = reflector_wiring_comb_gen([('Y', 'A'), ('R', 'B'), ('U', 'C'), ('H', 'D'), ('Q', 'E'), ('S', 'F'), ('L', 'G'), ('D', 'H'), ('P', 'I'), ('X', 'J'), ('N', 'K'), ('G', 'L'), ('O', 'M'), ('K', 'N'), ('M', 'O'), ('I', 'P'), ('E', 'Q'), ('B', 'R'), ('F', 'S'), ('Z', 'T'), ('C', 'U'), ('W', 'V'), ('V', 'W'), ('J', 'X'), ('A', 'Y'), ('T', 'Z')], 4)
 

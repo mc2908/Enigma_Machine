@@ -8,10 +8,9 @@ from Reflector import *
 class EnigmaMachine:
 
     def __init__(self):
-        self.plugboard = Plugboard()
-        self.rotorcase = Rotorscase()
-        self.reflector = None
-        self.num_reflectors = 0
+        self.plugboard = Plugboard()        # Plugboard object is a container of Pluglead objects
+        self.rotorcase = Rotorscase()       # Rotorcase object is a container of Rotor objects
+        self.reflector = None               # Reflector object
 
     def insert_plugleads(self, mapping):
         for pairs in mapping:
@@ -20,15 +19,14 @@ class EnigmaMachine:
     def remove_plugleads(self):
         self.plugboard.clear()
 
-
     def add_rotors(self, names):
         names.reverse()
         for name in names:
             rotor = rotor_from_name(name)
             self.rotorcase.add(rotor)
 
-    def set_rotor_initial_pos(self, initialPositions):
-        self.rotorcase.set_rotor_initial_positions(initialPositions)
+    def set_rotor_initial_pos(self, initial_positions):
+        self.rotorcase.set_rotor_initial_positions(initial_positions)
 
     def set_rotor_ring_setting(self, ring_settings):
         self.rotorcase.set_rotor_initial_ring_setting(ring_settings)
@@ -48,22 +46,18 @@ class EnigmaMachine:
         self.rotorcase.reset_to_default_position()
 
     def add_reflector(self, name):
-        if self.num_reflectors > 1:
-            return
+        if self.reflector is not None:
+            raise ValueError("Reflector has already been added, Use replace_reflector(name, *args) instead")
         self.reflector = reflector_from_name(name)
-        self.num_reflectors += 1
 
     def replace_reflector(self, name, *args):
         self.reflector = reflector_from_name(name)
         if len(args) == 1:
             self.reflector.wiring = args[0]
 
-
-
     def encode(self, in_string):
         if not self.check_machine_components():
-            print("Machine not setup properly")
-            return
+            raise ValueError("Enigma Machine is not property set up. Check your inputs")
         out_string = ""
         for char in in_string:
             self.rotorcase.rotate()
@@ -148,7 +142,8 @@ if __name__ == '__main__':
     encoded_string = em6.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     print(encoded_string)
 
-
+    em7 = EnigmaMachine()
+    encoded_string = em7.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     """
     em3.reflector.reset_std_wiring()
     em3.reset_default_rotor_position()

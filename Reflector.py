@@ -14,8 +14,10 @@ class Reflector:
         return out_contact
 
     def swap_wiring(self, new_wiring):
-        self.wiring = dict(new_wiring)
-        self.wiring_type = WiringType.Mod
+        new_wiring_dict = dict(new_wiring)
+        if self.wiring != new_wiring_dict:
+            self.wiring = new_wiring_dict
+            self.wiring_type = WiringType.Mod
 
     def reset_std_wiring(self):
         self.wiring = dict(get_wiring_by_ReflectorType(self.eType))
