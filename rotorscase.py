@@ -1,4 +1,4 @@
-from Rotor import *
+from rotor import *
 
 
 class Rotorscase:

@@ -1,8 +1,8 @@
-from Rotor import *
-from Plugboard import *
-from PlugLead import *
-from Rotorscase import *
-from Reflector import *
+from rotor import *
+from plugboard import *
+from pluglead import *
+from rotorscase import *
+from reflector import *
 
 
 class EnigmaMachine:
