@@ -1,37 +1,59 @@
 from enum import Enum
-
+import utility
 
 class Rotor:
 
     def __init__(self, etype, wiring, notch):
-        self.location = 0                           # Rotor location in the Rotorcase 0 = rightmost rotor
-        self.pos = 0                                # Rotor current position
-        self.default_pos = 0                        # Rotor default position (set when the rotor is first added)
-        self.ringSet = 0                            # Rotor ring setting
-        self.eType = etype                          # Rotor Type
-        self.wiring = [dict([(t[1], t[0]) for t in wiring])]
-        self.wiring.append(dict(wiring))            # Rotor wiring  <tuple(<string>,<string>)>
-        self.s_Notch = notch                        # Rotor notch  <string>
-        self.num_Notch = Rotor.char2num(notch)      # Rotor notch <integer>
-        self.left_rotor = None                      # Rotor on the left side
-        self.right_rotor = None                     # Rotor on the right side
-        self.has_rotated = False                    # Flag to indicate whether or not the rotor has rotated for a given keyboard press
+        self.location = 0                                       # Rotor location in the Rotorcase 0 = rightmost rotor
+        self.pos = 0                                            # Rotor current position
+        self.default_pos = 0                                    # Rotor default position (set when the rotor is first added)
+        self.ringSet = 0                                        # Rotor ring setting
+        self.eType = etype                                      # Rotor Type
+        self.wiring = [dict([(t[1], t[0]) for t in wiring])]    # Rotor wiring right to left
+        self.wiring.append(dict(wiring))                        # Rotor wiring  left to right
+        self.s_Notch = notch                                    # Rotor notch string
+        self.num_Notch = Rotor.char2num_static(notch)           # Rotor notch integer (base 26)
+        self.left_rotor = None                                  # Rotor object on the left side
+        self.right_rotor = None                                 # Rotor object on the right side
+        self.has_rotated = False                                # Flag to indicate whether or not the rotor has rotated for a given keyboard press
+        self.char2num_dict = dict([(chr(x), x-65) for x in range(65, 91)])
+        self.num2char_dict = dict([(x-65, chr(x)) for x in range(65, 91)])
 
+    # set rotor initial position
     def set_initial_position(self, s_pos):
-        s_pos = s_pos.upper()
-        if s_pos > "Z" or s_pos < "A":
-            return
-        self.pos = Rotor.char2num(s_pos)
-        self.default_pos = Rotor.char2num(s_pos)
+        if s_pos not in self.wiring[0].keys():
+            raise ValueError(f"Rotor initial position {s_pos} does not exist. Please select a letter between A - Z")
+        self.pos = self.char2num(s_pos)
+        self.default_pos = self.char2num(s_pos)
 
+    # reset the current rotor position to the initial default value
     def reset_to_default(self):
         self.pos = self.default_pos
 
+    # set the rotor ring setting. it cna wither be defined as integer {1-26} or string {A-Z}
     def set_ring_setting(self, val):
-        if type(val) == str:
-            val = Rotor.char2num(val) + 1
-        self.ringSet = val - 1
+        if type(val) is str:
+            self.set_ring_setting_str(val)
+        elif type(val) is int:
+            self.set_ring_setting_int(val)
+        else:
+            raise TypeError("Ring setting can only be defined as integer or string")
 
+    # set the rotor ring setting from a str input
+    def set_ring_setting_str(self, val):
+        if val in self.wiring[0].keys():
+            self.ringSet = self.char2num(val - 1)
+        else:
+            raise ValueError(f"Ring setting {val} does not exist. Please enter either a number between 1- 26 or a character between A - Z")
+
+    # set the rotor ring setting from an integer input
+    def set_ring_setting_int(self, val):
+        if 1 <= val <= 26:
+            self.ringSet = val - 1
+        else:
+            raise ValueError("fRing setting {val} does not exist. Please enter either a number between 1- 26 or a character between A - Z")
+
+    # method to make the rotor rotate of one position
     def rotate(self):
         if self.is_fourth_rotor():  # the fourth rotor never rotates
             return
@@ -39,68 +61,96 @@ class Rotor:
         if not self.is_leftmost_rotor() and self.is_at_notch():
             self.left_rotor.rotate()
         self.pos = (self.pos + 1) % 26  # increase position by 1
-        self.has_rotated = True
+        self.has_rotated = True         # this rotor has rotate for this key stroke
         return True
 
+    # if this rotor is the leftmost one return True
     def is_leftmost_rotor(self):
         return self.left_rotor is None
 
+    # if this rotor is the rightmost one return True
     def is_rightmost_rotor(self):
         return self.right_rotor is None
 
+    # if this rotor is fourth and leftmost rotor return True
     def is_fourth_rotor(self):
         return self.location == 3
 
+    # encode a letter in the forward direction (left to right). char_in is the input coming for the previous element(rotor/ reflector/plugboard)
     def encode_right_to_left(self, char_in):
-        char_in = char_in.upper()
-        # get the correct right contact alignment considering position and ring setting
-        _, right_contact = self.adjust_rotor_contact_right_to_left(char_in)
-        # get the
-        left_contact = self.wiring[0][right_contact]
+        # input validation
+        wiring = self.wiring[0]
+        if char_in not in wiring.keys():
+            raise ValueError()
+        # get the correct rotor right contact after adjusting rotor alignment for position and ring setting
+        right_contact = self.adjust_rotor_contact_right_to_left(char_in)
+        left_contact = wiring[right_contact]
         if self.is_leftmost_rotor():
             # the last rotor needs to pass adjusted contact information to the reflector because the reflector does not
             # know anything about the position of the rotors
-            left_contact = Rotor.num2Char((Rotor.char2num(left_contact) - self.pos + self.ringSet) % 26)
+            left_contact = self.num2char((self.char2num(left_contact) - self.pos + self.ringSet) % 26)
         return left_contact
 
-    def encode_left_to_right(self, char_in):
-        char_in = char_in.upper()
-        # get the list of right contacts
-        _, left_contact = self.adjust_rotor_contact_left_to_right(char_in)
-        right_contact = self.wiring[1][left_contact]
+    # encode a letter in the backward direction (right to left). char_in is the input coming for the previous element(rotor/ reflector/plugboard)
+    def encode_left_to_right(self, char_in: str):
+        # input validation
+        wiring = self.wiring[1]
+        if char_in not in wiring.keys():
+            raise ValueError()
+        # get the correct rotor left contact after adjusting rotor alignment for position and ring setting
+        left_contact = self.adjust_rotor_contact_left_to_right(char_in)
+        # fetch the rotor right contact wired to the left one
+        right_contact = wiring[left_contact]
         if self.is_rightmost_rotor():
-            right_contact = Rotor.num2Char((Rotor.char2num(right_contact) - self.pos + self.ringSet) % 26)
+            # the last rotor needs to pass adjusted contact information to the reflector because the reflector does not
+            # know anything about the position of the rotors
+            right_contact = self.num2char((self.char2num(right_contact) - self.pos + self.ringSet) % 26)
         return right_contact
 
+    # method to get the right alignment between this rotor and the previous element on the right(i.e. rotor/ reflector/ plugboard)
     def adjust_rotor_contact_right_to_left(self, char_in):
         right_rotor_pos = 0
         right_rotor_ring_set = 0
         if not self.is_rightmost_rotor():
             right_rotor_pos = self.right_rotor.pos
             right_rotor_ring_set = self.right_rotor.ringSet
-        contact_idx = (Rotor.char2num(char_in) + self.pos - self.ringSet - right_rotor_pos + right_rotor_ring_set) % 26
-        contact = Rotor.num2Char(contact_idx)
-        return contact_idx, contact
+        contact_idx = (self.char2num(char_in) + self.pos - self.ringSet - right_rotor_pos + right_rotor_ring_set) % 26
+        contact = self.num2char(contact_idx)
+        return contact
 
+    # method to get the right alignment between this rotor and the previous element on the left (i.e. rotor/ reflector/ plugboard)
     def adjust_rotor_contact_left_to_right(self, char_in):
         left_rotor_pos = 0
         left_rotor_ring_set = 0
         if not self.is_leftmost_rotor():
             left_rotor_pos = self.left_rotor.pos
             left_rotor_ring_set = self.left_rotor.ringSet
-        contact_idx = (Rotor.char2num(char_in) + self.pos - self.ringSet - left_rotor_pos + left_rotor_ring_set) % 26
-        contact = Rotor.num2Char(contact_idx)
-        return contact_idx, contact
+        contact_idx = (self.char2num(char_in) + self.pos - self.ringSet - left_rotor_pos + left_rotor_ring_set) % 26
+        contact = self.num2char(contact_idx)
+        return contact
 
+    # checking if this rotor is at the notch position
     def is_at_notch(self):
         return self.num_Notch == self.pos
 
+    # map chars A - Z to ints 0 - 25
+    def char2num(self, char):
+        return self.char2num_dict[char]
+
+    # map ints 0 - 25 to chars A - Z
+    def num2char(self, num):
+        return self.num2char_dict[num]
+
+
+    def __eq__(self, other):
+        return self.eType == other.eType
+
     @ staticmethod
-    def char2num(char):
+    def char2num_static(char):
         return ord(char) - ord("A")
 
     @staticmethod
-    def num2Char(num):
+    def num2Char_static(num):
         return chr(num + ord("A"))
 
 
@@ -123,7 +173,6 @@ def rotor_from_name(rotor_name):
     return rotor
 
 
-
 def Rotor_type_from_name(rotor_name):
     if rotor_name == "I":
         rotor_type = RotorType.I
@@ -143,8 +192,11 @@ def Rotor_type_from_name(rotor_name):
     elif rotor_name == "Beta":
         rotor_type = RotorType.Beta
 
-    else:  # must be Gamma
+    elif rotor_name == "Gamma":  # must be Gamma
         rotor_type = RotorType.Gamma
+
+    else:
+        raise ValueError(f"Rotor {rotor_name} does not exist.")
     return rotor_type
 
 
@@ -173,8 +225,8 @@ def get_notch_by_RotorType(rotor_type):
 
 if __name__ == '__main__':
     rot = rotor_from_name("III")
-    rot.set_intial_position("B")
+    rot.set_initial_position("B")
     print(rot.wiring)
     outChar = rot.encode_right_to_left("A")
     print(outChar)
-    print(rot.encode_left_to_right(outChar))
+    rot.encode_left_to_right("a")

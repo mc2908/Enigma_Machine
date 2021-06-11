@@ -12,8 +12,10 @@ class Rotorscase:
         self.debug_mode = False
 
     def add(self, rotor):
-        if self.num_rotors > self.max_rotors:
-            return
+        if self.num_rotors >= self.max_rotors:
+            raise ValueError(f"Maximum number of rotors ({self.max_rotors}) has been exceeded.")
+        if rotor in self.rotors:
+            raise ValueError(f"Rotor ({rotor.eType}) already added")
         self.rotors.append(rotor)
         rotor.location = self.num_rotors
         if self.num_rotors >= 1:
@@ -37,7 +39,7 @@ class Rotorscase:
                 print(f"rotor {rotor.eType} is now on position {Rotor.num2Char(rotor.pos)}")
 
     def __reset_rotor(self):
-        for  rotor in self.rotors:
+        for rotor in self.rotors:
             rotor.has_rotated = False
 
     def reset_to_default_position(self):
@@ -84,6 +86,16 @@ class Rotorscase:
             rotor = self.rotors[idx]
             rotor.set_ring_setting(ring)
 
+
+
+
+if __name__ == '__main__':
+
+    RC = Rotorscase()
+    rotor1 = rotor_from_name("I")
+    rotor2 = rotor_from_name("I")
+    RC.add(rotor1)
+    RC.add(rotor2)
 
 
 

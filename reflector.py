@@ -1,4 +1,5 @@
 from enum import Enum
+import utility
 
 
 class Reflector:
@@ -9,7 +10,8 @@ class Reflector:
         self.eType = etype
 
     def encode(self, char_in):
-        char_in = char_in.upper()
+        if char_in not in self.wiring:
+            raise ValueError()
         out_contact = self.wiring[char_in]
         return out_contact
 
@@ -23,6 +25,19 @@ class Reflector:
         self.wiring = dict(get_wiring_by_ReflectorType(self.eType))
         self.wiring_type = WiringType.Std
 
+    def find_wiring_changes(self):
+        if self.wiring_type == WiringType.Std:
+            return []
+        std_wiring = set(get_wiring_by_ReflectorType(self.wiring_type))
+        mod_wiring = set(self.wiring.items())
+        mod_wiring.difference_update(std_wiring)
+        mod_wiring = list(mod_wiring)
+        for x, y in mod_wiring:
+            if (y, x) in mod_wiring:
+                idx = mod_wiring.index((y, x))
+                mod_wiring.pop(idx)
+        mod_wiring = [x+y for x, y in mod_wiring]
+        return mod_wiring
 
 class ReflectorType(Enum):
     ND = 0
@@ -37,15 +52,15 @@ class WiringType(Enum):
     Mod = 2
 
 
-def reflectorType_from_name(rotor_name):
-    if rotor_name == "A":
+def reflectorType_from_name(reflector_name):
+    if reflector_name == "A":
         reflector_type = ReflectorType.A
-
-    elif rotor_name == "B":
+    elif reflector_name == "B":
         reflector_type = ReflectorType.B
-
-    else:  # must be C
+    elif reflector_name == "C":  # must be C
         reflector_type = ReflectorType.C
+    else:
+        raise ValueError(f"Reflector {reflector_name} does not exist")
     return reflector_type
 
 
@@ -66,3 +81,7 @@ def get_wiring_by_ReflectorType(rotor_type):
 
     wiring = list(zip(wiring_matrix[rotor_type.value - 1], base_contact))
     return wiring
+
+
+if __name__ == "__main__":
+    pass

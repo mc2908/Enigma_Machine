@@ -3,6 +3,7 @@ from plugboard import *
 from pluglead import *
 from rotorscase import *
 from reflector import *
+import utility
 
 
 class EnigmaMachine:
@@ -47,7 +48,7 @@ class EnigmaMachine:
 
     def add_reflector(self, name):
         if self.reflector is not None:
-            raise ValueError("Reflector has already been added, Use replace_reflector(name, *args) instead")
+            raise ValueError(f"One reflector has already been added, to swap reflector use: replace_reflector(name) instead")
         self.reflector = reflector_from_name(name)
 
     def replace_reflector(self, name, *args):
@@ -55,28 +56,52 @@ class EnigmaMachine:
         if len(args) == 1:
             self.reflector.wiring = args[0]
 
-    def encode(self, in_string):
+    def encode(self, message_in):
         if not self.check_machine_components():
-            raise ValueError("Enigma Machine is not property set up. Check your inputs")
-        out_string = ""
-        for char in in_string:
+            raise SystemError("Enigma Machine is not property set up. Check your inputs")
+        message_in = utility.check_input_message_formatting(message_in)
+        message_out = ""
+        for char_in in message_in:
             self.rotorcase.rotate()
-            char_out = self.plugboard.encode(char)
+            char_out = self.plugboard.encode(char_in)
             char_out = self.rotorcase.encode_right_to_left(char_out)
             char_out = self.reflector.encode(char_out)
             char_out = self.rotorcase.encode_left_to_right(char_out)
             char_out = self.plugboard.encode(char_out)
-            out_string += char_out
-        return out_string
+            message_out += char_out
+        return message_out
 
     def check_machine_components(self):
         reflector_ok = self.reflector is not None
+        if not reflector_ok:
+            print(f"Reflector has not been added. Please add a reflector")
         rotors_ok = self.rotorcase.min_rotors <= self.rotorcase.num_rotors <= self.rotorcase.max_rotors
+        if not rotors_ok:
+            print(f"Number of added rotors is less than the minimum required (3)")
+
         plugboard_ok = True
         return reflector_ok and rotors_ok and plugboard_ok
 
+    @staticmethod
+    def check_message_formatting(message: str):
+        if type(message) is not str:
+            raise TypeError("Encode method only accepts strings as input")
+        message = message.upper()
+        message = [x for x in message if 65 <= ord(x) <= 90]
+        message = "".join(message)
+        return message
+
 
 if __name__ == '__main__':
+    em0 = EnigmaMachine()
+    em0.add_rotors(["I", "II", "III", "IV"])
+    em0.set_rotor_initial_pos(["A", "A", "Z"])
+    em0.set_rotor_ring_setting([1, 1, 1])
+    em0.add_reflector("B")
+    em0.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
+
+
+
 
     em0 = EnigmaMachine()
     em0.add_rotors(["I", "II", "III"])
@@ -142,12 +167,20 @@ if __name__ == '__main__':
     encoded_string = em6.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     print(encoded_string)
 
-    em7 = EnigmaMachine()
-    encoded_string = em7.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
-    """
+
+
     em3.reflector.reset_std_wiring()
     em3.reset_default_rotor_position()
     encoded_string = em3.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     print(em3.reflector.wiring_type)
     print(encoded_string)
-    """
+
+
+    em7 = EnigmaMachine()
+    em7.add_rotors(["I", "II", "III", "IV"])
+    em7.set_rotor_initial_pos(["A", "A", "Z"])
+    em7.set_rotor_ring_setting([1, 1, 1])
+    em7.add_reflector("B")
+    em7.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
+    encoded_string = em7.encode("sdf**3494dfsa")
+    print(encoded_string)

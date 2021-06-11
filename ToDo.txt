@@ -9,8 +9,39 @@ Commenting code throughout:
         code_cracking
 On Crack_code instead of returing the full list or reflector wiring, return only the differences with respec the standard configurations.
 Think of changin file names from capital case to lwoer case
-        Rotor --> rotor
-        Reflector --> reflector
-        PlugLead --> pluglead
-        Plugboard --> pluglead
-        Rotorcase --> rotorcase
+        Rotor --> rotor                 DONE
+        Reflector --> reflector         DONE
+        PlugLead --> pluglead           DONE
+        Plugboard --> pluglead          DONE
+        Rotorcase --> rotorcase         DONE
+
+Handling of bad inputs.
+Rotor Class
+1) adding more than 4 rotors not allowed------DONE
+2) adding a rotor twice not allowed ------ DONE
+3) Adding a rotor that does not exist not allowed DONE
+
+Plugboard / pluglead
+1) adding a pluglead whose connections are already used  not allowed----DONE
+
+Reflector
+1) Adding more than one reflector not allowed  DONE
+2) Adding a reflector that does not exist not allowed DONE
+
+Handling badly formatted input
+Rotor               DONE
+Reflector           DONE
+Plugboard           DONE
+Enigma machine      TODO
+
+
+
+Possible extras:
+
+Simple command line GUI
+Calculate the number of Combinations
+
+
+
+
+

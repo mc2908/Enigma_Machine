@@ -4,7 +4,7 @@ class PlugLead:
         mapping = mapping.upper()
         from_char = mapping[0]
         to_char = mapping[1]
-        # Create a dictionary with back and forth
+        # Create a dictionary with back and forth mapping
         self.letter_encode = {from_char: to_char, to_char: from_char}
 
     def encode(self, character):
@@ -13,9 +13,12 @@ class PlugLead:
             out_character = self.letter_encode[character]
         return out_character
 
-
+    def __eq__(self, other):
+        return any(x == y for x, y in zip(self.letter_encode.keys(), other.letter_encode.keys())) or\
+               any(x == y for x, y in zip(self.letter_encode.keys(), other.letter_encode.values()))
 if __name__ == "__main__":
     pass
+
 # You can use this section to write tests and demonstrations of your enigma code.
 #   pluglead1 = PlugLead("AS")
 #   print(pluglead1.encode("T"))
