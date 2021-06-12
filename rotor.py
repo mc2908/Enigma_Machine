@@ -30,7 +30,7 @@ class Rotor:
     def reset_to_default(self):
         self.pos = self.default_pos
 
-    # set the rotor ring setting. it cna wither be defined as integer {1-26} or string {A-Z}
+    # set the rotor ring setting. it can either be defined as integer {1-26} or string {A-Z}
     def set_ring_setting(self, val):
         if type(val) is str:
             self.set_ring_setting_str(val)

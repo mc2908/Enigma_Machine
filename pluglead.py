@@ -1,7 +1,18 @@
 class PlugLead:
+
+    contacts = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+                          "T", "U", "V", "W", "X", "Y", "Z"}
+
     def __init__(self, mapping):
-        # implement here some input checking
-        mapping = mapping.upper()
+        # the input mapping must be a string
+        if type(mapping) != str:
+            raise TypeError("Plug lead must be defined by string")
+        # and must have length 2
+        if len(mapping) != 2:
+            raise ValueError("Each plug lead must be specified by two capital case character from A to Z")
+        # Make sure that each element is a valid plug board contact
+        if mapping[0] not in self.contacts or mapping[1] not in self.contacts:
+            raise ValueError("Specified Plug Lead contacts do not exist")
         from_char = mapping[0]
         to_char = mapping[1]
         # Create a dictionary with back and forth mapping
@@ -9,6 +20,7 @@ class PlugLead:
 
     def encode(self, character):
         out_character = character
+        # if the plug lead connects the input char then map it to the other end of the lead.
         if character in self.letter_encode:
             out_character = self.letter_encode[character]
         return out_character

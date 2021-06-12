@@ -4,13 +4,13 @@ from rotor import *
 class Rotorscase:
 
     def __init__(self):
-        self.nRotations = 0
-        self.rotors = []
-        self.num_rotors = 0
-        self.max_rotors = 4
-        self.min_rotors = 3
+        self.rotors = []            # List of rotor objects
+        self.num_rotors = 0         # number of added rotors
+        self.max_rotors = 4         # number of maximum rotors allowed
+        self.min_rotors = 3         # number of minimum rotors allowed
         self.debug_mode = False
 
+    # Add Rotor object. Rotors must be added in right to left order
     def add(self, rotor):
         if self.num_rotors >= self.max_rotors:
             raise ValueError(f"Maximum number of rotors ({self.max_rotors}) has been exceeded.")
@@ -19,19 +19,20 @@ class Rotorscase:
         self.rotors.append(rotor)
         rotor.location = self.num_rotors
         if self.num_rotors >= 1:
+            # add a pointer to this rotor in the previously added rotor
             self.rotors[self.num_rotors-1].left_rotor = rotor
+            # add a pointer to the previously added rotor in this rotor
             rotor.right_rotor = self.rotors[self.num_rotors-1]
         self.num_rotors += 1
 
     def rotate(self):
-        self.nRotations += 1
+        # each new keyboard press, before making the rotors rotate, reset the has_rotated flag
         self.__reset_rotor()
-        if self.debug_mode:
-            print(f"\n")
-            print(f"rotation number {self.nRotations}")
         can_rotate = True
+        # rotate each rotor depending on their location, positions and whether or not it has already rotate fot this key stroke
         for idx, rotor in enumerate(self.rotors):
             if rotor.is_rightmost_rotor() or rotor.is_at_notch() and not rotor.is_leftmost_rotor() and not rotor.has_rotated and can_rotate:
+                # Rotate this rotor. If this rotor has not rotated the next one on left cannot rotate.
                 can_rotate = rotor.rotate()
             else:
                 can_rotate = False
@@ -46,6 +47,7 @@ class Rotorscase:
         for rotor in self.rotors:
             rotor.reset_to_default()
 
+    # Pass the input character through all rotors mappings from right  to left
     def encode_right_to_left(self, in_char):
         out_char = in_char
         for rotor in self.rotors:
@@ -53,6 +55,7 @@ class Rotorscase:
         self.rotors.reverse()
         return out_char
 
+    # Pass the input character through all rotors mappings from left to right
     def encode_left_to_right(self, in_char):
         out_char = in_char
         for rotor in self.rotors:
@@ -70,17 +73,26 @@ class Rotorscase:
         pass
 
     def remove_all_rotors(self):
-        self.nRotations = 0
         self.rotors = []
         self.num_rotors = 0
 
-    def set_rotor_initial_positions(self,positions):
+    # set the rotors default initial position
+    def set_rotors_initial_positions(self, positions):
+        if self.num_rotors == 0:
+            raise ValueError("No rotors have been added yet. Insert rotors first")
+        if len(positions) != self.num_rotors:
+            raise ValueError("Number of specified rotors positions does not match the number of rotors")
         positions.reverse()
         for idx, pos in enumerate(positions):
             rotor = self.rotors[idx]
             rotor.set_initial_position(pos)
 
-    def set_rotor_initial_ring_setting(self,ring_set):
+    # set the rotors default ring setting
+    def set_rotor_initial_ring_setting(self, ring_set):
+        if self.num_rotors == 0:
+            raise ValueError("No rotors have been added yet. Insert rotors first")
+        if len(ring_set) != self.num_rotors:
+            raise ValueError("Number of specified ring settings does not match the number of rotors")
         ring_set.reverse()
         for idx, ring in enumerate(ring_set):
             rotor = self.rotors[idx]

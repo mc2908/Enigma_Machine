@@ -1,13 +1,13 @@
 Remaining Tasks:
 
 Commenting code throughout:
-        Rotor
-        RotorCase
-        Enigma
-        Plugboard
-        Pluglead
-        code_cracking
-On Crack_code instead of returing the full list or reflector wiring, return only the differences with respec the standard configurations.
+        Rotor       DONE
+        RotorCase   DONE
+        Enigma      TODO
+        Plugboard   DONE
+        Pluglead    DONE
+        code_cracking DONE
+On break_code instead of returing the full list or reflector wiring, return only the differences with respec the standard configurations.
 Think of changin file names from capital case to lwoer case
         Rotor --> rotor                 DONE
         Reflector --> reflector         DONE
@@ -32,7 +32,8 @@ Handling badly formatted input
 Rotor               DONE
 Reflector           DONE
 Plugboard           DONE
-Enigma machine      TODO
+Enigma machine      DONE
+code_craking        DONE ( need to write messages)
 
 
 
@@ -40,6 +41,8 @@ Possible extras:
 
 Simple command line GUI
 Calculate the number of Combinations
+Time complexity             DONE
+Print encode flow
 
 
 
