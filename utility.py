@@ -1,5 +1,5 @@
 import warnings
-
+import matplotlib.pyplot as plt
 
 def check_input_message_formatting(message: str, message_type):
     if type(message) is not str:
@@ -25,7 +25,30 @@ def doubleFactorial(n):
     return n * doubleFactorial(n-2)
 
 
+def moving_avarage(list, window):
+    out_list = []
+    for idx, el in enumerate(list):
+        if idx < window:
+            #avg = list[idx]
+            s = sum(list[0: idx+1])
+            avg = s / (idx+1)
+        else:
+            s = sum(list[idx+1-window: idx+1])
+            avg = s / window
+        out_list.append(avg)
+    return out_list
+
+
 
 if __name__ == '__main__':
     val = doubleFactorial(6)
     print(val)
+
+
+    x = [x for x in range(100)]
+    y = moving_avarage(x,7)
+    plt.plot(x, y)
+    plt.show()
+
+
+

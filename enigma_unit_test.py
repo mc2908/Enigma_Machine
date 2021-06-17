@@ -8,7 +8,7 @@ message = "sasdfasdfas"
 em0 = EnigmaMachine()
 em0.add_rotors(["I", "II", "III", "IV"])
 em0.set_rotors_initial_pos(["A", "A", "Z"])
-em0.set_rotor_ring_setting([1, 1, 1])
+em0.set_rotors_ring_setting([1, 1, 1])
 em0.add_reflector("C")
 em0.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
 encoded_string = em0.encode(message)

@@ -223,7 +223,7 @@ class CodeBreaking(FrozenClass):
                             self.__em.set_rotors_initial_pos(list(pos))
                             for setting in self.__rotor_ring_setting_comb:
                                 # Apply new ring settings
-                                self.__em.set_rotor_ring_setting(list(setting))
+                                self.__em.set_rotors_ring_setting(list(setting))
                                 # Before decoding the string reset the rotors to their default initial position
                                 self.__em.reset_default_rotor_position()
                                 decoded_string = self.__em.encode(encoded_string)

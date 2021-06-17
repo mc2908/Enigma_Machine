@@ -51,7 +51,7 @@ class Rotor:
         if 1 <= val <= 26:
             self.ringSet = val - 1
         else:
-            raise ValueError("fRing setting {val} does not exist. Please enter either a number between 1- 26 or a character between A - Z")
+            raise ValueError(f"Ring setting {val} does not exist. Please enter either a number between 1- 26 or a character between A - Z")
 
     # method to make the rotor rotate of one position
     def rotate(self):
