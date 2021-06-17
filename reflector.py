@@ -64,14 +64,14 @@ def reflectorType_from_name(reflector_name):
     return reflector_type
 
 
-def reflector_from_name(rotor_name):
-    reflector_type = reflectorType_from_name(rotor_name)
+def reflector_from_name(reflector_name):
+    reflector_type = reflectorType_from_name(reflector_name)
     wiring = get_wiring_by_ReflectorType(reflector_type)
     reflector = Reflector(reflector_type, wiring)
     return reflector
 
 
-def get_wiring_by_ReflectorType(rotor_type):
+def get_wiring_by_ReflectorType(reflector_type):
     base_contact = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
     wiring_matrix = [
@@ -79,7 +79,7 @@ def get_wiring_by_ReflectorType(rotor_type):
                    ['Y', 'R', 'U', 'H', 'Q', 'S', 'L', 'D', 'P', 'X', 'N', 'G', 'O', 'K', 'M', 'I', 'E', 'B', 'F', 'Z', 'C', 'W', 'V', 'J', 'A', 'T'],  # B
                    ['F', 'V', 'P', 'J', 'I', 'A', 'O', 'Y', 'E', 'D', 'R', 'Z', 'X', 'W', 'G', 'C', 'T', 'K', 'U', 'Q', 'S', 'B', 'N', 'M', 'H', 'L']]  # C
 
-    wiring = list(zip(wiring_matrix[rotor_type.value - 1], base_contact))
+    wiring = list(zip(wiring_matrix[reflector_type.value - 1], base_contact))
     return wiring
 
 

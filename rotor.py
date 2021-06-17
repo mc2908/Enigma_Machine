@@ -57,12 +57,11 @@ class Rotor:
     def rotate(self):
         if self.is_fourth_rotor():  # the fourth rotor never rotates
             return
-        # If this rotor isn't the last one and it is at the notch position, then rotate the next rotor on the left first
+        # If this rotor isn't the last one and it is at the notch position, then first rotate the next rotor on the left
         if not self.is_leftmost_rotor() and self.is_at_notch():
             self.left_rotor.rotate()
-        self.pos = (self.pos + 1) % 26  # increase position by 1
+        self.pos = (self.pos + 1) % 26  # increase rotor position by 1
         self.has_rotated = True         # this rotor has rotate for this key stroke
-        return True
 
     # if this rotor is the leftmost one return True
     def is_leftmost_rotor(self):

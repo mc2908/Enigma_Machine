@@ -33,14 +33,14 @@ Rotor               DONE
 Reflector           DONE
 Plugboard           DONE
 Enigma machine      DONE
-code_craking        DONE ( need to write messages)
+code_craking        DONE
 
 
 
 Possible extras:
 
 Simple command line GUI
-Calculate the number of Combinations
+Calculate the number of Combinations   DONE
 Time complexity             DONE
 Print encode flow
 

@@ -12,10 +12,10 @@ class Plugboard:
 
         # Maximum number of plug leads available is 10
         if self.num_plugleads > self.max_num_plugleads:
-            ValueError("Maximum number of pluglead connections has been exceeded")
+            raise ValueError("Maximum number of pluglead connections has been exceeded")
         # two or more identical plug leads cannot exist
         if a_pluglead in self.plugleads:
-            ValueError("Pluglead connections already in use")
+            raise ValueError(" 1 or more pluglead contacts are already in use")
         # two or more plugleads cannot have the same keys
         # TODO
         self.plugleads.append(a_pluglead)
@@ -50,10 +50,8 @@ if __name__ == "__main__":
     import pluglead
     PB = Plugboard()
     pl1 = pluglead.PlugLead("AK")
-    pl2 = pluglead.PlugLead("KG")
-    pl3 = pluglead.PlugLead("A?")
+    pl2 = pluglead.PlugLead("KA")
 
     PB.add(pl1)
     PB.add(pl1)
-    PB.add(pl3)
 

@@ -2,6 +2,8 @@ from enigma import *
 import itertools
 from frozen_class import *
 import time
+import math
+import utility
 
 
 class CodeBreaking(FrozenClass):
@@ -39,79 +41,82 @@ class CodeBreaking(FrozenClass):
         self.__rotors_positions = [self.__available_rotor_pos for _ in range(0, n)]
         self.__rotors_ring_setting = [self.__available_ring_setting for _ in range(0, n)]
 
+    # set known rotor constraints:
     def set_rotors(self, rotors):
         if type(rotors) is not list:
-            raise TypeError()
+            raise TypeError("Rotors known constraints must be a list: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
         if len(rotors) != self.rotor_num:
-            raise ValueError
+            raise ValueError("The number of rotor constraints must match the number of rotors")
         for rotor_elm in rotors:
             if type(rotor_elm) is not list:
-                raise TypeError()
+                raise TypeError("Each rotor known constraint must be a list: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
             for r in rotor_elm:
                 if type(r) is not str:
-                    raise TypeError()
+                    raise TypeError("Each element of each rotor known constraint must be a string: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
                 if r not in self.__available_rotors:
-                    raise ValueError()
+                    raise ValueError(f"rotor name {r} is not valid constraint")
         self.__rotors_name = rotors
 
+    # set known rotor position constraints:
     def set_rotor_positions(self,positions):
         if type(positions) is not list:
-            raise TypeError()
+            raise TypeError("Rotors positions known constraints must be a list: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
         if len(positions) != self.rotor_num:
-            raise ValueError
+            raise ValueError("The number of rotor position constraints must match the number of rotors")
         for position_elm in positions:
             if type(position_elm) is not list:
-                raise TypeError()
+                raise TypeError("Each rotor position known constraint must be a list: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
             for pos in position_elm:
                 if type(pos) is not str:
-                    raise TypeError()
+                    raise TypeError("Each element of each rotor position known constraint must be a string: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
                 if pos not in self.__available_rotor_pos:
-                    raise ValueError()
+                    raise ValueError(f"rotor position {pos} is not valid constraint")
         self.__rotors_positions = positions
 
+    # set known ring settings constraints:
     def set_ring_settings(self, ring_settings):
         if type(ring_settings) is not list:
-            raise TypeError()
+            raise TypeError("Ring setting known constraints must be a list: e.g [[1, 2], [25] [1, 2, 3,...,25]]")
         if len(ring_settings) != self.rotor_num:
-            raise ValueError
+            raise ValueError("The number of ring setting constraints must match the number of rotors")
         for ring_set_elm in ring_settings:
             if type(ring_set_elm) is not list:
-                raise TypeError()
+                raise TypeError("Each rotor ring settings known constraint must be a list: e.g [[1, 2], [25] [1, 2, 3,...,25]] ")
             for ring in ring_set_elm:
                 if type(ring) is not int:
-                    raise TypeError()
+                    raise TypeError("Each element of each rotor ring settings known constraint must be an integer:  e.g [[1, 2], [25] [1, 2, 3,...,25]]")
                 if ring not in self.__available_ring_setting:
-                    raise ValueError()
+                    raise ValueError(f"ring setting {ring} is not valid constraint")
         self.__rotors_ring_setting = ring_settings
 
+    # set known plugboard constraints:
     def set_plugboard_connections(self, connections):
         if type(connections) is not list:
-            raise TypeError()
+            raise TypeError("Plug board constraints must be a list: e.g. ['AB', 'C?','??','F?']")
         if len(connections) > 10:
-            raise ValueError
+            raise ValueError("The number known constraint cannot be higher than 10 as the Plug Board only accepts 10 plug leads")
         for plug_lead in connections:
             if type(plug_lead) is not str:
-                raise TypeError()
+                raise TypeError("Each know plug lead pair must be a string:  e.g. ['AB', 'C?','??','F?']")
             if len(plug_lead) != 2:
-                raise ValueError()
-            for contacts in plug_lead:
-                if contacts not in self.__available_plugs + ["?"]:
-                    raise ValueError()
+                raise ValueError("Each know plug lead pair must have length 2:  e.g. ['AB', 'C?','??','F?']")
+            for contact in plug_lead:
+                if contact not in self.__available_plugs + ["?"]:
+                    raise ValueError(f"contact {contact} is not a valid plug board contact")
         self.__plugboard_connection = connections
 
+    # set known reflector constraints:
     def set_reflectors(self,reflectors):
         if type(reflectors) is not list:
-            raise TypeError()
+            raise TypeError("Reflector constraints must be a list known possibilities of Reflector Name:  e.g. ['A','B','C']")
         for reflector in reflectors:
             if type(reflector) is not str:
-                raise TypeError()
-            if len(reflector) != 1:
-                raise ValueError()
+                raise TypeError("Each known Reflector Name constraint must be a string")
             if reflector not in self.__available_reflectors:
-                raise ValueError()
+                raise ValueError(f"reflector {reflector} is not a valid reflector name")
         self.__reflector_name = reflectors
 
-    # helper method to load the
+    # helper method to load the common words Data base.
     def load_common_words_DB(self, file_path):
         with open(file_path, 'r') as file:
             DB = file.readlines()
@@ -119,18 +124,23 @@ class CodeBreaking(FrozenClass):
         words_BB = map(lambda s: s.upper(), words_DB)
         self.common_words_DB = list(words_BB)
 
-    def calculate_total_combination(self):
+    def generate_combination(self):
         # Calculate possible combinations for Rotor Position
-        all_comb = CodeBreaking.calculate_all_combinations(self.__available_rotor_pos, self.rotor_num)
+        #my_lists = [a_list for _ in range(n)]
+        all_comb = itertools.product(*[self.__available_rotor_pos for _ in range(self.rotor_num)])
+        #all_comb = CodeBreaking.calculate_all_combinations(self.__available_rotor_pos, self.rotor_num)
+        # Filter the Rotor position Combination to only keep those ones which satisfy the constraints
         self.__rotor_pos_comb = CodeBreaking.filter_combinations(self.__rotors_positions, all_comb)
 
         # Calculate possible combination for Rotor Ring Setting
-        all_comb = CodeBreaking.calculate_all_combinations(self.__available_ring_setting, self.rotor_num)
-        # filter the combination to only keep those ones which are ....
+        all_comb = itertools.product(*[self.__available_ring_setting for _ in range(self.rotor_num)])
+        #all_comb = CodeBreaking.calculate_all_combinations(self.__available_ring_setting, self.rotor_num)
+        # Filter the Rotor Ring Setting Combination to only keep those ones which satisfy the constraints
         self.__rotor_ring_setting_comb = CodeBreaking.filter_combinations(self.__rotors_ring_setting, all_comb)
 
         # Calculate possible combination for Rotors nName
         comb = list(itertools.permutations(self.__available_rotors, self.rotor_num))
+        # Filter the Rotor combination to only keep those ones which satisfy the constraints
         self.__rotor_name_comb = CodeBreaking.filter_combinations(self.__rotors_name, comb)
 
         # Calculate possible combination for Reflector
@@ -138,21 +148,57 @@ class CodeBreaking(FrozenClass):
         comb_list = [x for x, in comb if x in self.__reflector_name]
         self.__reflectors_comb = comb_list
 
+    def calculate_combinations_number(self):
+        comb_num_rotors = len(self.__rotor_name_comb)
+        comb_num_rotor_pos = len(self.__rotor_pos_comb)
+        comb_num_ring_set = len(self.__rotor_ring_setting_comb)
+        comb_num_reflector = len(self.__reflectors_comb)
+        comb_num_plugboard = self.calc_plugboard_comb_num()
+        if self.allow_reflector_modifications:
+            n = self.reflector_pairs_to_swap
+            comb_reflector_wire = int(math.factorial(13) / math.factorial(13 - n) / math.factorial(n) * utility.doubleFactorial(n-1))
+        else:
+            comb_reflector_wire = 1
+        tot_comb_num = comb_num_rotors * comb_num_rotor_pos * comb_num_ring_set * comb_num_reflector * comb_num_plugboard * comb_reflector_wire
+        return tot_comb_num
+
+    def calc_plugboard_comb_num(self):
+       # available_plugs = self.__available_plugs
+        plugboard_connections = self.__plugboard_connection
+        letters = "".join(plugboard_connections)
+        num_missing_letter = letters.count("?")
+        num_full_pairs = plugboard_connections.count("??")
+        num_half_pairs = num_missing_letter - num_full_pairs * 2
+        known_letters = letters.replace("?", "")
+        num_know_letters = len(known_letters)
+        letters_rem = 26 - num_know_letters
+        if num_full_pairs == 0:
+            ncomb_full_pair = 1
+        else:
+            ncomb_full_pair = math.factorial(letters_rem) / (math.factorial(letters_rem - num_full_pairs * 2) * 2 ** num_full_pairs * math.factorial(num_full_pairs))
+        letters_rem = letters_rem - num_full_pairs * 2
+        ncomb_half_pairs = math.factorial(letters_rem) / math.factorial(letters_rem - num_half_pairs)
+        ncomb_tot = int(ncomb_full_pair * ncomb_half_pairs)
+        return ncomb_tot
+
     # Apply all possible combinations to the enigma machina to decode the "encoded_sting".
     # if the string contains one or more words specified in crib_list, the decoded message gets stored and scored based
     # on how many common words it contains.
     # The function returns the decoded message with the highest score plus the enigma machine settings.
     def break_code(self, encoded_string, crib_list):
+        # Calculate the possible combinations for the enigma machine settings
+        self.generate_combination()
         self.decoded_string_DB = {}
         self.settings_DB = {}
+        comb_num = self.calculate_combinations_number()
         if not self.allow_reflector_modifications:
             self.reflector_pairs_to_swap = 0
         no_crib_given = False
         if len(crib_list) == 0:
             crib_list = ["A"]
             no_crib_given = True
-        crib_list = list(map(lambda l: l.upper(), crib_list))
-        # print(f"number of total possible combination  = {len(self.rotor_name_comb)*len(self.rotor_pos_comb)*len(self.rotor_ring_setting_comb)* len(self.reflectors_comb)}")
+        crib_list = list(map(lambda l: utility.check_input_message_formatting(l, "Crib Word"), crib_list))
+        print(f"The number of total possible combination is {comb_num}")
         for plug_setting in plugboard_combinations_gen(self.__plugboard_connection, self.__available_plugs):
             # Remove the previously applied plug leads
             self.__em.remove_plugleads()
@@ -191,10 +237,17 @@ class CodeBreaking(FrozenClass):
                                         self.settings_DB[decoded_string] = [rotors, pos, setting, plug_setting,
                                                                             reflector, wiring_diff]
         # Find the decoded message with the highest score.
-        best_score, out_string = max([(v, k) for k, v in self.decoded_string_DB.items()])
-        # Retrieve the Enigma Machine setting which generated the decoded message.
-        settings = self.settings_DB[out_string]
-        return out_string, best_score, settings
+        if len(self.decoded_string_DB.keys()) == 0:
+            bretval = False
+            out_string = ""
+            best_score = []
+            settings = [[] for x in range(6)]
+        else:
+            bretval = True
+            best_score, out_string = max([(v, k) for k, v in self.decoded_string_DB.items()])
+            # Retrieve the Enigma Machine setting which generated the decoded message.
+            settings = self.settings_DB[out_string]
+        return bretval, out_string, best_score, settings
 
     # method to score an input string based on how many common words it contains. longer words are given higher score.
     # standard common_words_DB contains the most common 10000 words in english language excluding swear words
@@ -222,30 +275,18 @@ class CodeBreaking(FrozenClass):
             raise ValueError(f"constraints has wrong length ({len(constraints)}), Expected 3 or 4")
         return filtered_comb
 
-    # helper method to calculate all possible combination (with repetitions) of n terms from a given list (my_list)
-    @staticmethod
-    def calculate_all_combinations(my_list, n):
-        a, b, c, *d = [my_list for _ in range(n)]
-        if len(d) == 0:
-            all_comb = itertools.product(a, b, c)
-        else:
-            all_comb = itertools.product(a, b, c, d[0])
-        return all_comb
-
-
     @staticmethod
     def code1():
         t_start = time.time()
         cb = CodeBreaking()
         cb.set_rotors([["Beta"], ["Gamma"], ["V"]])
         cb.set_rotor_positions([["M"], ["J"], ["M"]])
-        cb.set_ring_settings([[4, 3], [2], [14]])
+        cb.set_ring_settings([[4], [2], [14]])
         cb.set_plugboard_connections(["KI", "NX", "FL"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code("DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ",
-                                                         ["SECRETS"])
+        print("Decrypting Code1 with Crib info....")
+        solution = cb.break_code("DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ", ["SECRETS"])
         t_elapsed_code_1 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_1, 1)
+        print_results(solution, t_elapsed_code_1, 1)
 
     @staticmethod
     def code1noCrib():
@@ -253,13 +294,12 @@ class CodeBreaking(FrozenClass):
         cb = CodeBreaking()
         cb.set_rotors([["Beta"], ["Gamma"], ["V"]])
         cb.set_rotor_positions([["M"], ["J"], ["M"]])
-        cb.set_ring_settings([[4, 3], [2], [14]])
+        cb.set_ring_settings([[4], [2], [14]])
         cb.set_plugboard_connections(["KI", "NX", "FL"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code("DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ",
-                                                        [])
+        print("Decrypting Code1 with no Crib info....")
+        solution = cb.break_code("DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ", [])
         t_elapsed_code_1 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_1, 1)
+        print_results(solution, t_elapsed_code_1, 1)
 
     @staticmethod
     def code2():
@@ -269,11 +309,10 @@ class CodeBreaking(FrozenClass):
         cb.set_ring_settings([[23], [2], [10]])
         cb.set_reflectors(["B"])
         cb.set_plugboard_connections(["VH", "PT", "ZG", "BJ", "EY", "FS"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH",
-                                                         ["UNIVERSITY"])
+        print("Decrypting Code2 with Crib info....")
+        solution = cb.break_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH", ["UNIVERSITY"])
         t_elapsed_code_2 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_2, 2)
+        print_results(solution, t_elapsed_code_2, 2)
 
     @staticmethod
     def code2noCrib():
@@ -283,11 +322,10 @@ class CodeBreaking(FrozenClass):
         cb.set_ring_settings([[23], [2], [10]])
         cb.set_reflectors(["B"])
         cb.set_plugboard_connections(["VH", "PT", "ZG", "BJ", "EY", "FS"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH",
-                                                        [])
+        print("Decrypting Code2 with no Crib info....")
+        solution = cb.break_code("CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH", [])
         t_elapsed_code_2 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_2, 2)
+        print_results(solution, t_elapsed_code_2, 2)
 
     @staticmethod
     def code3():
@@ -297,11 +335,10 @@ class CodeBreaking(FrozenClass):
         cb.set_ring_settings([[x for x in range(1, 27) if x % 2 == 0 and (x < 10 or x > 19)] for _ in range(3)])
         cb.set_rotor_positions([["E"], ["M"], ["Y"]])
         cb.set_plugboard_connections(["FH", "TS", "BE", "UQ", "KD", "AL"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code(
-            "ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY", ["THOUSANDS"])
+        print("Decrypting Code3 with Crib info....")
+        solution = cb.break_code("ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY", ["THOUSANDS"])
         t_elapsed_code_3 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_3, 3)
+        print_results(solution, t_elapsed_code_3, 3)
 
     @staticmethod
     def code3noCrib():
@@ -311,11 +348,10 @@ class CodeBreaking(FrozenClass):
         cb.set_ring_settings([[x for x in range(1, 27) if x % 2 == 0 and (x < 10 or x > 19)] for _ in range(3)])
         cb.set_rotor_positions([["E"], ["M"], ["Y"]])
         cb.set_plugboard_connections(["FH", "TS", "BE", "UQ", "KD", "AL"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code(
-            "ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY", [])
+        print("Decrypting Code3 with no Crib info....")
+        solution = cb.break_code("ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY", [])
         t_elapsed_code_3 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_3, 3)
+        print_results(solution, t_elapsed_code_3, 3)
 
     @staticmethod
     def code4():
@@ -326,11 +362,10 @@ class CodeBreaking(FrozenClass):
         cb.set_rotor_positions([["S"], ["W"], ["U"]])
         cb.set_plugboard_connections(["WP", "RJ", "A?", "VF", "I?", "HN", "CG", "BS"])
         cb.set_reflectors(["A"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code(
-            "SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW", ["TUTOR"])
+        print("Decrypting Code4 with Crib info....")
+        solution = cb.break_code("SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW", ["TUTOR"])
         t_elapsed_code_4 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_4, 4)
+        print_results(solution, t_elapsed_code_4, 4)
 
     @staticmethod
     def code4noCrib():
@@ -341,11 +376,10 @@ class CodeBreaking(FrozenClass):
         cb.set_rotor_positions([["S"], ["W"], ["U"]])
         cb.set_plugboard_connections(["WP", "RJ", "A?", "VF", "I?", "HN", "CG", "BS"])
         cb.set_reflectors(["A"])
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code(
-            "SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW", [])
+        print("Decrypting Code4 with no Crib info....")
+        solution = cb.break_code("SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW", [])
         t_elapsed_code_4 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_4, 4)
+        print_results(solution, t_elapsed_code_4, 4)
 
     @staticmethod
     def code5():
@@ -357,11 +391,11 @@ class CodeBreaking(FrozenClass):
         cb.set_plugboard_connections(["UG", "IE", "PO", "NX", "WT"])
         cb.allow_reflector_modifications = True
         cb.reflector_pairs_to_swap = 4
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX",
+        print("Decrypting Code5 with Crib info....")
+        solution = cb.break_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX",
                                                          ["FACEBOOK", "TWITTER", "INSTAGRAM", "LINKEDIN", "YOUTUBE"])
         t_elapsed_code_5 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_5, 5)
+        print_results(solution, t_elapsed_code_5, 5)
 
     @staticmethod
     def code5noCrib():
@@ -373,11 +407,10 @@ class CodeBreaking(FrozenClass):
         cb.set_plugboard_connections(["UG", "IE", "PO", "NX", "WT"])
         cb.allow_reflector_modifications = True
         cb.reflector_pairs_to_swap = 4
-        cb.calculate_total_combination()
-        cracked_string, score, settings = cb.break_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX",
-                                                        [])
+        print("Decrypting Code5 with no Crib info....")
+        solution = cb.break_code("HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX", [])
         t_elapsed_code_5 = time.time() - t_start
-        print_results(cracked_string, score, settings, t_elapsed_code_5, 5)
+        print_results(solution, t_elapsed_code_5, 5)
 
     @staticmethod
     def all_codes():
@@ -388,10 +421,18 @@ class CodeBreaking(FrozenClass):
         CodeBreaking.code4()
         CodeBreaking.code5()
         t_elapsed = time.time() - t_start_tot
-        print(f"Total execution time: {t_elapsed}")
+        print(f"Total execution time: {round(t_elapsed,3)}")
 
-
-
+    @staticmethod
+    def all_codes_no_crib():
+        t_start_tot = time.time()
+        CodeBreaking.code1noCrib()
+        CodeBreaking.code2noCrib()
+        CodeBreaking.code3noCrib()
+        CodeBreaking.code4noCrib()
+        CodeBreaking.code5noCrib()
+        t_elapsed = time.time() - t_start_tot
+        print(f"Total execution time: {round(t_elapsed,3)}")
 
 
 # Generator which creates all possible combinations of plug board connections from given constraints
@@ -440,29 +481,7 @@ def full_pair_combination_gen(plug_board_contacts, n):
     bOut = False
     # iterate over the possible combination and only yield the ones where no contacts are repeated.
     for pair in all_full_pair_comb:
-        if len(pair) == 1 or len(pair) == 0:
-            yield pair
-            continue
-        for i in range(len(pair)):
-            for j in range(len(pair)):
-                if i == j:
-                    continue
-                # throw away the combination if two pairs share the same contact
-                if any(x == y for x, y in zip(pair[i], pair[j])) and i != j:
-                    bBrake = True
-                    break
-                new_t = tuple(reversed(pair[j]))
-                # check also the cross terms
-                if any(x == y for x, y in zip(pair[i], new_t)) and i != j:
-                    bBrake = True
-                    break
-                bOut = True
-                bBrake = True
-            if bBrake:
-                bBrake = False
-                break
-        if bOut:
-            bOut = False
+        if len(set("".join([x + y for x, y in pair]))) == n * 2:
             yield pair
 
 
@@ -486,7 +505,10 @@ def reflector_wiring_comb_gen(std_wiring, n):
     right_contact_to_swap_comb = itertools.combinations(all_right_contacts_unique, n)
     for right_contacts_list in right_contact_to_swap_comb:
         # Only swap wires in pairs
-        right_contacts_pairs_comb = full_pair_combination_gen(right_contacts_list, 2)
+        N = 2
+        if n < 3:
+            N = 1
+        right_contacts_pairs_comb = full_pair_combination_gen(right_contacts_list, N)
         for right_contact_pairs in right_contacts_pairs_comb:
             # Pre create a copy of the input wiring which will be later on modified with the new contact pairs
             new_wiring = std_wiring.copy()
@@ -511,6 +533,45 @@ def reflector_wiring_comb_gen(std_wiring, n):
             yield new_wiring
 
 
+def reflector_wiring_comb_gen2(std_wiring, n):
+    # On the first call return the standard wiring
+    yield std_wiring
+    all_right_contacts = [x for (_, x) in std_wiring]
+    all_left_contacts = [y for (y, _) in std_wiring]
+    all_right_contacts_unique = []
+    all_left_contacts_unique = []
+    for idx, rc in enumerate(all_right_contacts):
+        lc = all_left_contacts[idx]
+        if lc in all_right_contacts_unique:
+            continue
+        # list that contains the reflector contacts which receive the input char
+        all_right_contacts_unique.append(rc)
+        # list that contains the respective contacts the input char is mapped to by the reflector
+        all_left_contacts_unique.append(lc)
+    # generate all possible combination of right contact to swap
+    right_contact_to_swap_comb = itertools.combinations(all_right_contacts_unique, n)
+    for right_contacts_list in right_contact_to_swap_comb:
+        # Only swap wires in pairs
+        if n % 2 == 1:
+            raise ValueError
+        right_contacts_pairs_comb = full_pair_combination_gen(right_contacts_list, n // 2)
+        for right_contact_pairs in right_contacts_pairs_comb:
+            # Pre create a copy of the input wiring which will be later on modified with the new contact pairs
+            new_wiring = std_wiring.copy()
+            new_left_contact_pairs = []
+            # iterate over the possible right pairs
+            for a_right_contact_pair in right_contact_pairs:
+                # find the correspondent left contact
+                this_wire_pair_left_contact = [y for (y, x) in std_wiring if x in a_right_contact_pair]
+                # swap the left contacts
+                new_left_contact_pairs.append((this_wire_pair_left_contact[1], this_wire_pair_left_contact[0]))
+            # merge the right contact pairs with the swapped left contact pairs
+            new_connections = list(zip(join_iterable_2_tuple(new_left_contact_pairs), join_iterable_2_tuple(right_contact_pairs)))
+            # from the second call onwards return the modified wiring
+            yield new_connections
+
+
+
 def join_iterable_2_tuple(iterable):
     out = ()
     for x, y in iterable:
@@ -519,18 +580,20 @@ def join_iterable_2_tuple(iterable):
 
 
 # helper function which prints the results
-def print_results(crakedstring, score, settings, t_elapsed, n):
-    print(f"The decoded messages is {crakedstring} with a score of {score}")
-    print(f"The Enigma Machine settings are:\n"
-          f" Rotors: {settings[0]}\n"
-          f" Rotor positions: {settings[1]}\n"
-          f" Rotor settings: {settings[2]}\n"
-          f" Plugboard connections: {settings[3]}\n"
-          f" Reflector: {settings[4]}\n"
-          f" Not standard Reflector connections: {settings[5]}\n")
-    print(f"Code {n} execution time: {t_elapsed} seconds")
-    print("\n")
-
+def print_results(solution, t_elapsed, n):
+    bfound, crakedstring, score, settings = solution
+    if bfound:
+        print(f"The decoded messages is {crakedstring} with a score of {score}")
+        print(f"The Enigma Machine settings are:\n"
+              f" Rotors: {settings[0]}\n"
+              f" Rotor positions: {settings[1]}\n"
+              f" Rotor settings: {settings[2]}\n"
+              f" Plugboard connections: {settings[3]}\n"
+              f" Reflector: {settings[4]}\n"
+              f" Not standard Reflector connections: {settings[5]}")
+    else:
+        print(f"No solutions has been found which match the given crib(s)")
+    print(f"Code {n} execution time: {round(t_elapsed, 3)} seconds\n")
 
 
 
@@ -539,4 +602,4 @@ def print_results(crakedstring, score, settings, t_elapsed, n):
 if __name__ == '__main__':
 
     CodeBreaking.all_codes()
-    #CodeCraking.code3noCrib()
+

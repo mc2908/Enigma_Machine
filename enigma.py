@@ -72,7 +72,7 @@ class EnigmaMachine:
         if not self.check_machine_components():
             raise SystemError("Enigma Machine is not property set up. Check your inputs")
         # check that all components of the enigma machine are properly set up
-        message_in = utility.check_input_message_formatting(message_in)
+        message_in = utility.check_input_message_formatting(message_in, "Input Message")
         message_out = ""
         # iteratively loop over the input message and encode one letter at the time
         for char_in in message_in:
@@ -132,7 +132,7 @@ class EnigmaMachine:
 
 if __name__ == '__main__':
 
-    EnigmaMachine.time_complexity(1000)
+   # EnigmaMachine.time_complexity(1000)
 
 
     em0 = EnigmaMachine()

@@ -28,14 +28,16 @@ class Rotorscase:
     def rotate(self):
         # each new keyboard press, before making the rotors rotate, reset the has_rotated flag
         self.__reset_rotor()
-        can_rotate = True
-        # rotate each rotor depending on their location, positions and whether or not it has already rotate fot this key stroke
+        # iterate over the rotors from right to left and rotate if necessary.
+        # This outer for loop takes care of the double stepping
         for idx, rotor in enumerate(self.rotors):
-            if rotor.is_rightmost_rotor() or rotor.is_at_notch() and not rotor.is_leftmost_rotor() and not rotor.has_rotated and can_rotate:
-                # Rotate this rotor. If this rotor has not rotated the next one on left cannot rotate.
-                can_rotate = rotor.rotate()
+            # Check if this rotor can rotate depending on its location, positions and whether or not it has already rotated for this key stroke
+            if rotor.is_rightmost_rotor() or rotor.is_at_notch() and not rotor.is_leftmost_rotor() and not rotor.has_rotated:
+                # Rotate this rotor
+                rotor.rotate()
             else:
-                can_rotate = False
+                # If this rotor could not rotate the remaining ones on the left cannot rotate for sure.
+                return
             if self.debug_mode:
                 print(f"rotor {rotor.eType} is now on position {Rotor.num2Char(rotor.pos)}")
 
@@ -52,6 +54,7 @@ class Rotorscase:
         out_char = in_char
         for rotor in self.rotors:
             out_char = rotor.encode_right_to_left(out_char)
+        # reverse the list to get it ready for encode_left_to_right
         self.rotors.reverse()
         return out_char
 
@@ -60,17 +63,12 @@ class Rotorscase:
         out_char = in_char
         for rotor in self.rotors:
             out_char = rotor.encode_left_to_right(out_char)
+        # reverse the list to get it ready for encode_right_to_left
         self.rotors.reverse()
         return out_char
 
     def get_rotor_by_location(self, idx):
         return self.rotors[idx-1]
-
-    def get_rotor_by_name(self):
-        pass
-
-    def remove_rotor_by_name(self):
-        pass
 
     def remove_all_rotors(self):
         self.rotors = []
