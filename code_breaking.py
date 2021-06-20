@@ -1,12 +1,12 @@
 from enigma import *
 import itertools
-from frozen_class import *
 import time
 import math
 import utility
 
 
-class CodeBreaking(FrozenClass):
+class CodeBreaking():
+
     def __init__(self):
         self.__available_rotors = ["I", "II", "III", "IV", "V", "Beta", "Gamma"]
         self.__available_ring_setting = list(range(1, 27))
@@ -35,7 +35,6 @@ class CodeBreaking(FrozenClass):
         self.load_common_words_DB("google-10000-english-no-swears.txt")
         self.decoded_string_DB = {}
         self.settings_DB = {}
-        self._freeze()
 
     def set_number_of_rotors(self, n):
         self.__rotor_num = n
