@@ -84,4 +84,6 @@ def get_wiring_by_ReflectorType(reflector_type):
 
 
 if __name__ == "__main__":
-    pass
+    reflector = reflector_from_name("A")
+    assert(reflector.encode("A") == "E")
+    assert(reflector.encode("E") == "A")

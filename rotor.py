@@ -1,5 +1,5 @@
 from enum import Enum
-import utility
+
 
 class Rotor:
 
@@ -55,13 +55,16 @@ class Rotor:
 
     # method to make the rotor rotate of one position
     def rotate(self):
-        if self.is_fourth_rotor():  # the fourth rotor never rotates
+        if self.is_fourth_rotor():
+            # the fourth rotor never rotates
             return
         # If this rotor isn't the last one and it is at the notch position, then first rotate the next rotor on the left
         if not self.is_leftmost_rotor() and self.is_at_notch():
             self.left_rotor.rotate()
-        self.pos = (self.pos + 1) % 26  # increase rotor position by 1
-        self.has_rotated = True         # this rotor has rotate for this key stroke
+        # increase rotor position by 1
+        self.pos = (self.pos + 1) % 26
+        # this rotor has rotate for this key stroke
+        self.has_rotated = True
 
     # if this rotor is the leftmost one return True
     def is_leftmost_rotor(self):
@@ -75,7 +78,7 @@ class Rotor:
     def is_fourth_rotor(self):
         return self.location == 3
 
-    # encode a letter in the forward direction (left to right). char_in is the input coming for the previous element(rotor/ reflector/plugboard)
+    # encode a letter in the forward direction (right to left). Char_in is the input coming for the previous element(rotor/ reflector/plugboard)
     def encode_right_to_left(self, char_in):
         # input validation
         wiring = self.wiring[0]
@@ -90,7 +93,7 @@ class Rotor:
             left_contact = self.num2char((self.char2num(left_contact) - self.pos + self.ringSet) % 26)
         return left_contact
 
-    # encode a letter in the backward direction (right to left). char_in is the input coming for the previous element(rotor/ reflector/plugboard)
+    # encode a letter in the backward direction (left to right). Char_in is the input coming for the previous element(rotor/ reflector/plugboard)
     def encode_left_to_right(self, char_in: str):
         # input validation
         wiring = self.wiring[1]
@@ -101,15 +104,17 @@ class Rotor:
         # fetch the rotor right contact wired to the left one
         right_contact = wiring[left_contact]
         if self.is_rightmost_rotor():
-            # the last rotor needs to pass adjusted contact information to the reflector because the reflector does not
+            # The last rotor needs to pass the adjusted contact information to the reflector because the reflector does not
             # know anything about the position of the rotors
             right_contact = self.num2char((self.char2num(right_contact) - self.pos + self.ringSet) % 26)
         return right_contact
 
-    # method to get the right alignment between this rotor and the previous element on the right(i.e. rotor/ reflector/ plugboard)
+    # Get the right alignment between this rotor and the previous element on the right.
     def adjust_rotor_contact_right_to_left(self, char_in):
         right_rotor_pos = 0
         right_rotor_ring_set = 0
+        # If this rotor is not the rightmost one, take into account the position and ring setting of the previous rotor
+        # on the right to get the correct alignment between the two
         if not self.is_rightmost_rotor():
             right_rotor_pos = self.right_rotor.pos
             right_rotor_ring_set = self.right_rotor.ringSet
@@ -121,6 +126,8 @@ class Rotor:
     def adjust_rotor_contact_left_to_right(self, char_in):
         left_rotor_pos = 0
         left_rotor_ring_set = 0
+        # If this rotor is not the leftmost one, take into account the position and ring setting of the previous rotor
+        # on the left to get the correct alignment between the two
         if not self.is_leftmost_rotor():
             left_rotor_pos = self.left_rotor.pos
             left_rotor_ring_set = self.left_rotor.ringSet
@@ -140,7 +147,7 @@ class Rotor:
     def num2char(self, num):
         return self.num2char_dict[num]
 
-
+    # Overwriting the __eq__ inbuilt method: two rotors are considered equal if of the same type
     def __eq__(self, other):
         return self.eType == other.eType
 
@@ -153,6 +160,7 @@ class Rotor:
         return chr(num + ord("A"))
 
 
+# Enumerator class to uniquely identify the rotors
 class RotorType(Enum):
     ND = 0
     I = 1
@@ -164,40 +172,33 @@ class RotorType(Enum):
     Gamma = 7
 
 
+# Instantiate a rotor object from name
 def rotor_from_name(rotor_name):
-    rotor_type = Rotor_type_from_name(rotor_name)
+    rotor_type = rotor_type_from_name(rotor_name)
     wiring = get_wiring_by_rotorType(rotor_type)
     notch = get_notch_by_RotorType(rotor_type)
-    rotor = Rotor(rotor_type, wiring, notch)
-    return rotor
+    this_rotor = Rotor(rotor_type, wiring, notch)
+    return this_rotor
 
 
-def Rotor_type_from_name(rotor_name):
+def rotor_type_from_name(rotor_name):
     if rotor_name == "I":
         rotor_type = RotorType.I
-
     elif rotor_name == "II":
         rotor_type = RotorType.II
-
     elif rotor_name == "III":
         rotor_type = RotorType.III
-
     elif rotor_name == "IV":
         rotor_type = RotorType.IV
-
     elif rotor_name == "V":
         rotor_type = RotorType.V
-
     elif rotor_name == "Beta":
         rotor_type = RotorType.Beta
-
     elif rotor_name == "Gamma":  # must be Gamma
         rotor_type = RotorType.Gamma
-
     else:
         raise ValueError(f"Rotor {rotor_name} does not exist.")
     return rotor_type
-
 
 
 def get_wiring_by_rotorType(rotor_type):
@@ -217,15 +218,34 @@ def get_wiring_by_rotorType(rotor_type):
 
 
 def get_notch_by_RotorType(rotor_type):
-    notchList = ["Q", "E", "V", "J", "Z", " ", " "]
-    notch = notchList[rotor_type.value-1]
+    notch_list = ["Q", "E", "V", "J", "Z", " ", " "]
+    notch = notch_list[rotor_type.value-1]
     return notch
 
 
 if __name__ == '__main__':
-    rot = rotor_from_name("III")
-    rot.set_initial_position("B")
-    print(rot.wiring)
-    outChar = rot.encode_right_to_left("A")
-    print(outChar)
-    rot.encode_left_to_right("a")
+
+    # test correct encoding
+    rotor = rotor_from_name("I")
+    assert (rotor.encode_right_to_left("A") == "E")
+    assert (rotor.encode_left_to_right("A") == "U")
+
+
+    # test worng inputs
+    try:
+        Rotor = rotor_from_name("HELLO")
+        print("Test failed")
+    except ValueError:
+        print("Test passed")
+
+    try:
+        Rotor = rotor_from_name([])
+        print("Test failed")
+    except ValueError:
+        print("Test passed")
+
+    try:
+        Rotor = rotor_from_name(342534)
+        print("Test failed")
+    except ValueError:
+        print("Test passed")

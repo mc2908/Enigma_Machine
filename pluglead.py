@@ -1,13 +1,13 @@
 class PlugLead:
-
+    # Available contacts: shared between all instances
     contacts = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
                           "T", "U", "V", "W", "X", "Y", "Z"}
 
     def __init__(self, mapping):
-        # the input mapping must be a string
+        # The input mapping must be a string
         if type(mapping) != str:
             raise TypeError("Plug lead must be defined by string")
-        # and must have length 2
+        # And must have length 2
         if len(mapping) != 2:
             raise ValueError("Each plug lead must be specified by two capital case character from A to Z")
         # Make sure that each element is a valid plug board contact
@@ -20,7 +20,7 @@ class PlugLead:
 
     def encode(self, character):
         out_character = character
-        # if the plug lead connects the input char then map it to the other end of the lead.
+        # If the plug lead connects the input char then map it to the other end of the lead.
         if character in self.letter_encode:
             out_character = self.letter_encode[character]
         return out_character
@@ -28,8 +28,38 @@ class PlugLead:
     def __eq__(self, other):
         return any(x == y for x, y in zip(self.letter_encode.keys(), other.letter_encode.keys())) or\
                any(x == y for x, y in zip(self.letter_encode.keys(), other.letter_encode.values()))
+
+
 if __name__ == "__main__":
-    pass
+
+    # Test correct encoding
+    lead = PlugLead("AG")
+    assert (lead.encode("A") == "G")
+    assert (lead.encode("D") == "D")
+
+    lead = PlugLead("DA")
+    assert (lead.encode("A") == "D")
+    assert (lead.encode("D") == "A")
+
+    # Test wrong inputs
+    try:
+        lead = PlugLead(2343)
+        print("Test failed")
+    except TypeError:
+        print("Test passed")
+
+    try:
+        lead = PlugLead("2343")
+        print("Test failed")
+    except ValueError:
+        print("Test passed")
+
+    try:
+        lead = PlugLead("&*")
+        print("Test failed")
+    except ValueError:
+        print("Test passed")
+
 
 # You can use this section to write tests and demonstrations of your enigma code.
 #   pluglead1 = PlugLead("AS")

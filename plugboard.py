@@ -1,37 +1,35 @@
 class Plugboard:
 
     def __init__(self):
-        self.plugleads = []             # list of plug leads
-        self.num_plugleads = 0          # number of added plug leads
-        self.max_num_plugleads = 10     # maximum number of plug leads allowed ( Enigma machine cam  by default with 10 leads)
+        self.plugleads = []             # List of plugleads
+        self.num_plugleads = 0          # Number of added plugleads
+        self.max_num_plugleads = 10     # Maximum number of plug leads allowed (Enigma machine came by default with 10 leads)
         self.__contact = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
                           "T", "U", "V", "W", "X", "Y", "Z"}
 
     def add(self, a_pluglead):
-        # Check that the plug lead which is being added had the right number of elements
-
         # Maximum number of plug leads available is 10
         if self.num_plugleads > self.max_num_plugleads:
-            raise ValueError("Maximum number of pluglead connections has been exceeded")
-        # two or more identical plug leads cannot exist
+            raise ValueError(f"Maximum number of plugleads ({self.max_num_plugleads}) connections has been exceeded")
+        # Two or more identical plug leads cannot exist
         if a_pluglead in self.plugleads:
-            raise ValueError(" 1 or more pluglead contacts are already in use")
-        # two or more plugleads cannot have the same keys
+            raise ValueError(" 1 or more pluglead contacts are already in use. Check your inputs")
+        # Two or more plugleads cannot have the same keys
         # TODO
         self.plugleads.append(a_pluglead)
         self.num_plugleads += 1
 
-    # remove a specific plug lead by name
+    # Remove a specific plug lead by name
     def remove(self, a_pluglead):
         if a_pluglead in self.plugleads:
             self.plugleads.remove(a_pluglead)
 
-    # remove all plug leads from the plug board
+    # Remove all plug leads from the plug board
     def clear(self):
         self.plugleads = []
         self.num_plugleads = 0
 
-    #
+    # Iterate over all plugleads in the plugboard to encode the input char
     def encode(self, char_in):
         # check that the input character is a valid one
         if char_in not in self.__contact:
@@ -47,11 +45,37 @@ class Plugboard:
 
 
 if __name__ == "__main__":
-    import pluglead
-    PB = Plugboard()
-    pl1 = pluglead.PlugLead("AK")
-    pl2 = pluglead.PlugLead("KA")
+    from pluglead import *
 
-    PB.add(pl1)
-    PB.add(pl1)
+    # Test correct encoding
+    plugboard = Plugboard()
+    plugboard.add(PlugLead("SZ"))
+    plugboard.add(PlugLead("GT"))
+    plugboard.add(PlugLead("DV"))
+    plugboard.add(PlugLead("KU"))
+
+    assert (plugboard.encode("K") == "U")
+    assert (plugboard.encode("A") == "A")
+
+    # Test wrong inputs
+    pb = Plugboard()
+    plugboard.add(PlugLead("AF"))
+    try:
+        plugboard.add(PlugLead("AF"))
+        print("Test failed")
+    except ValueError:
+        print("Test passed")
+
+    try:
+        plugboard.add(PlugLead("AK"))
+        print("Test failed")
+    except ValueError:
+        print("Test passed")
+
+
+
+
+
+
+
 

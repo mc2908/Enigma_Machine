@@ -29,117 +29,116 @@ class CodeBreaking(FrozenClass):
         self.__reflector_wiring_comb = []
         self.allow_reflector_modifications = False
         self.reflector_pairs_to_swap = 0
+        # Words DB taken from the github repository shown below:
+        # https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-no-swears.txt
+        self.__common_words_DB = []
         self.load_common_words_DB("google-10000-english-no-swears.txt")
         self.decoded_string_DB = {}
         self.settings_DB = {}
-
         self._freeze()
 
     def set_number_of_rotors(self, n):
-        self.rotor_num = n
+        self.__rotor_num = n
         self.__rotors_name = [self.__available_rotors for _ in range(0, n)]
         self.__rotors_positions = [self.__available_rotor_pos for _ in range(0, n)]
         self.__rotors_ring_setting = [self.__available_ring_setting for _ in range(0, n)]
 
-    # set known rotor constraints:
+    # Set known rotor constraints:
     def set_rotors(self, rotors):
         if type(rotors) is not list:
-            raise TypeError("Rotors known constraints must be a list: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
-        if len(rotors) != self.rotor_num:
+            raise TypeError("Rotors constraints must be a list: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
+        if len(rotors) != self.__rotor_num:
             raise ValueError("The number of rotor constraints must match the number of rotors")
         for rotor_elm in rotors:
             if type(rotor_elm) is not list:
-                raise TypeError("Each rotor known constraint must be a list: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
+                raise TypeError("Each rotor constraint must be a list: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
             for r in rotor_elm:
                 if type(r) is not str:
-                    raise TypeError("Each element of each rotor known constraint must be a string: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
+                    raise TypeError("Each element of each rotor constrait must be a string: e.g [['Gamma', 'II'], ['II', 'IV'] ['III', 'V']]")
                 if r not in self.__available_rotors:
                     raise ValueError(f"rotor name {r} is not valid constraint")
         self.__rotors_name = rotors
 
     # set known rotor position constraints:
-    def set_rotor_positions(self,positions):
+    def set_rotor_positions(self, positions):
         if type(positions) is not list:
-            raise TypeError("Rotors positions known constraints must be a list: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
-        if len(positions) != self.rotor_num:
+            raise TypeError("Rotors positions constraint must be a list: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
+        if len(positions) != self.__rotor_num:
             raise ValueError("The number of rotor position constraints must match the number of rotors")
         for position_elm in positions:
             if type(position_elm) is not list:
-                raise TypeError("Each rotor position known constraint must be a list: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
+                raise TypeError("Each rotor position constraint must be a list: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
             for pos in position_elm:
                 if type(pos) is not str:
-                    raise TypeError("Each element of each rotor position known constraint must be a string: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
+                    raise TypeError("Each element of each rotor position constraint must be a string: e.g [['A', 'B'], ['Z'] ['A', 'B', 'C',...,'Z']]")
                 if pos not in self.__available_rotor_pos:
                     raise ValueError(f"rotor position {pos} is not valid constraint")
         self.__rotors_positions = positions
 
-    # set known ring settings constraints:
+    # Set known ring settings constraints:
     def set_ring_settings(self, ring_settings):
         if type(ring_settings) is not list:
-            raise TypeError("Ring setting known constraints must be a list: e.g [[1, 2], [25] [1, 2, 3,...,25]]")
-        if len(ring_settings) != self.rotor_num:
+            raise TypeError("Ring setting constraints must be a list: e.g [[1, 2], [25] [1, 2, 3,...,25]]")
+        if len(ring_settings) != self.__rotor_num:
             raise ValueError("The number of ring setting constraints must match the number of rotors")
         for ring_set_elm in ring_settings:
             if type(ring_set_elm) is not list:
-                raise TypeError("Each rotor ring settings known constraint must be a list: e.g [[1, 2], [25] [1, 2, 3,...,25]] ")
+                raise TypeError("Each rotor ring settings constraint must be a list: e.g [[1, 2], [25] [1, 2, 3,...,25]] ")
             for ring in ring_set_elm:
                 if type(ring) is not int:
-                    raise TypeError("Each element of each rotor ring settings known constraint must be an integer:  e.g [[1, 2], [25] [1, 2, 3,...,25]]")
+                    raise TypeError("Each element of each rotor ring settings constraint must be an integer:  e.g [[1, 2], [25] [1, 2, 3,...,25]]")
                 if ring not in self.__available_ring_setting:
                     raise ValueError(f"ring setting {ring} is not valid constraint")
         self.__rotors_ring_setting = ring_settings
 
-    # set known plugboard constraints:
+    # Set known plugboard constraints:
     def set_plugboard_connections(self, connections):
         if type(connections) is not list:
             raise TypeError("Plug board constraints must be a list: e.g. ['AB', 'C?','??','F?']")
-        if len(connections) > 10:
-            raise ValueError("The number known constraint cannot be higher than 10 as the Plug Board only accepts 10 plug leads")
+        if len(connections) > 13:
+            raise ValueError("The number constraint cannot be higher than 13 as the Plug Board only accepts 13 plug leads")
         for plug_lead in connections:
             if type(plug_lead) is not str:
-                raise TypeError("Each know plug lead pair must be a string:  e.g. ['AB', 'C?','??','F?']")
+                raise TypeError("Each plug lead pair must be a string:  e.g. ['AB', 'C?','??','F?']")
             if len(plug_lead) != 2:
-                raise ValueError("Each know plug lead pair must have length 2:  e.g. ['AB', 'C?','??','F?']")
+                raise ValueError("Each plug lead pair must have length 2:  e.g. ['AB', 'C?','??','F?']")
             for contact in plug_lead:
                 if contact not in self.__available_plugs + ["?"]:
                     raise ValueError(f"contact {contact} is not a valid plug board contact")
         self.__plugboard_connection = connections
 
-    # set known reflector constraints:
-    def set_reflectors(self,reflectors):
+    # Set known reflector constraints:
+    def set_reflectors(self, reflectors):
         if type(reflectors) is not list:
-            raise TypeError("Reflector constraints must be a list known possibilities of Reflector Name:  e.g. ['A','B','C']")
-        for reflector in reflectors:
-            if type(reflector) is not str:
-                raise TypeError("Each known Reflector Name constraint must be a string")
-            if reflector not in self.__available_reflectors:
-                raise ValueError(f"reflector {reflector} is not a valid reflector name")
+            raise TypeError("Reflector constraints must be a list:  e.g. ['A','B','C']")
+        for this_reflector in reflectors:
+            if type(this_reflector) is not str:
+                raise TypeError("Each known Reflector Name constraint must be a string:  e.g. ['A','B','C']")
+            if this_reflector not in self.__available_reflectors:
+                raise ValueError(f"reflector {this_reflector} is not a valid reflector name")
         self.__reflector_name = reflectors
 
-    # helper method to load the common words Data base.
+    # Helper method to load the common words Data base.
     def load_common_words_DB(self, file_path):
         with open(file_path, 'r') as file:
             DB = file.readlines()
         words_DB = map(lambda s: s.strip("\n"), DB)
         words_BB = map(lambda s: s.upper(), words_DB)
-        self.common_words_DB = list(words_BB)
+        self.__common_words_DB = list(words_BB)
 
     def generate_combination(self):
         # Calculate possible combinations for Rotor Position
-        #my_lists = [a_list for _ in range(n)]
-        all_comb = itertools.product(*[self.__available_rotor_pos for _ in range(self.rotor_num)])
-        #all_comb = CodeBreaking.calculate_all_combinations(self.__available_rotor_pos, self.rotor_num)
+        all_comb = itertools.product(*[self.__available_rotor_pos for _ in range(self.__rotor_num)])
         # Filter the Rotor position Combination to only keep those ones which satisfy the constraints
         self.__rotor_pos_comb = CodeBreaking.filter_combinations(self.__rotors_positions, all_comb)
 
         # Calculate possible combination for Rotor Ring Setting
-        all_comb = itertools.product(*[self.__available_ring_setting for _ in range(self.rotor_num)])
-        #all_comb = CodeBreaking.calculate_all_combinations(self.__available_ring_setting, self.rotor_num)
+        all_comb = itertools.product(*[self.__available_ring_setting for _ in range(self.__rotor_num)])
         # Filter the Rotor Ring Setting Combination to only keep those ones which satisfy the constraints
         self.__rotor_ring_setting_comb = CodeBreaking.filter_combinations(self.__rotors_ring_setting, all_comb)
 
         # Calculate possible combination for Rotors nName
-        comb = list(itertools.permutations(self.__available_rotors, self.rotor_num))
+        comb = list(itertools.permutations(self.__available_rotors, self.__rotor_num))
         # Filter the Rotor combination to only keep those ones which satisfy the constraints
         self.__rotor_name_comb = CodeBreaking.filter_combinations(self.__rotors_name, comb)
 
@@ -148,6 +147,7 @@ class CodeBreaking(FrozenClass):
         comb_list = [x for x, in comb if x in self.__reflector_name]
         self.__reflectors_comb = comb_list
 
+    # Method to compute the total number of comination possible for any given input settings
     def calculate_combinations_number(self):
         comb_num_rotors = len(self.__rotor_name_comb)
         comb_num_rotor_pos = len(self.__rotor_pos_comb)
@@ -163,7 +163,6 @@ class CodeBreaking(FrozenClass):
         return tot_comb_num
 
     def calc_plugboard_comb_num(self):
-       # available_plugs = self.__available_plugs
         plugboard_connections = self.__plugboard_connection
         letters = "".join(plugboard_connections)
         num_missing_letter = letters.count("?")
@@ -182,7 +181,7 @@ class CodeBreaking(FrozenClass):
         return ncomb_tot
 
     # Apply all possible combinations to the enigma machina to decode the "encoded_sting".
-    # if the string contains one or more words specified in crib_list, the decoded message gets stored and scored based
+    # If the string contains one or more words specified in crib_list, the decoded message gets stored and scored based
     # on how many common words it contains.
     # The function returns the decoded message with the highest score plus the enigma machine settings.
     def break_code(self, encoded_string, crib_list):
@@ -198,25 +197,23 @@ class CodeBreaking(FrozenClass):
             crib_list = ["A"]
             no_crib_given = True
         crib_list = list(map(lambda l: utility.check_input_message_formatting(l, "Crib Word"), crib_list))
-        print(f"The number of total possible combination is {comb_num}")
+        print(f"The number of total possible combinations is {comb_num}")
         for plug_setting in plugboard_combinations_gen(self.__plugboard_connection, self.__available_plugs):
             # Remove the previously applied plug leads
             self.__em.remove_plugleads()
             # Insert new ones
             self.__em.insert_plugleads(plug_setting)
-            for reflector in self.__reflectors_comb:
+            for this_reflector in self.__reflectors_comb:
                 # Replace reflector
-                self.__em.replace_reflector(reflector)
+                self.__em.replace_reflector(this_reflector)
                 # Generate all allowed reflector wiring combination, if reflector_pairs_to_swap = 0 it generates the
                 # standard configuration based on the reflector name
-                for reflector_wiring in reflector_wiring_comb_gen(
-                        get_wiring_by_ReflectorType(reflectorType_from_name(reflector)), self.reflector_pairs_to_swap):
+                reflector_wiring_comb = reflector_wiring_comb_gen(get_wiring_by_ReflectorType(reflectorType_from_name(this_reflector)), self.reflector_pairs_to_swap)
+                for reflector_wiring in reflector_wiring_comb:
                     # Apply reflector wiring combination
                     self.__em.reflector.swap_wiring(reflector_wiring)
                     for rotors in self.__rotor_name_comb:
-                        # Remove all previously added rotors
-                        self.__em.remove_all_rotors()
-                        # Add new rotors combination
+                        # Add the new rotors combination
                         self.__em.add_rotors(list(rotors))
                         for pos in self.__rotor_pos_comb:
                             # Apply new rotor initial position
@@ -235,13 +232,13 @@ class CodeBreaking(FrozenClass):
                                         # Report only the differences between the standard and the modified reflector configurations
                                         wiring_diff = self.__em.reflector.find_wiring_changes()
                                         self.settings_DB[decoded_string] = [rotors, pos, setting, plug_setting,
-                                                                            reflector, wiring_diff]
+                                                                            this_reflector, wiring_diff]
         # Find the decoded message with the highest score.
         if len(self.decoded_string_DB.keys()) == 0:
             bretval = False
             out_string = ""
             best_score = []
-            settings = [[] for x in range(6)]
+            settings = [[] for _ in range(6)]
         else:
             bretval = True
             best_score, out_string = max([(v, k) for k, v in self.decoded_string_DB.items()])
@@ -249,18 +246,18 @@ class CodeBreaking(FrozenClass):
             settings = self.settings_DB[out_string]
         return bretval, out_string, best_score, settings
 
-    # method to score an input string based on how many common words it contains. longer words are given higher score.
-    # standard common_words_DB contains the most common 10000 words in english language excluding swear words
+    # Method to score an input string based on how many common words it contains. longer words are given higher score.
+    # Standard common_words_DB contains the most common 10000 words in english language excluding swear words
     def common_words_analysis(self, phrase):
         score = 0
-        for word in self.common_words_DB:
-            # do not score words with length less than 3 e.g. IS, TO, AT, IN, etc...
+        for word in self.__common_words_DB:
+            # Do not score words with length less than 3 e.g. IS, TO, AT, IN, etc...
             # they are more likely to be found in a randomly generated string
             if word in phrase and len(word) > 2:
                 score += len(word)
         return score
 
-    # helper methods which filters out the elements in all_comb if the ith sub-element of the element
+    # Helper methods which filters out the elements in all_comb if the ith sub-element of the element
     # is not present in the i(ith) element of constraints
     @staticmethod
     def filter_combinations(constraints, all_comb):
@@ -473,19 +470,17 @@ def plugboard_combinations_gen(plugboard_connection, all_available_plugs):
                 yield out_plug_board_connection
 
 
-# generator to create n unique plug leads (pair of letter) from a list of available contacts in the plugboard
+# Generator to create n unique plug leads (pair of letter) from a list of available contacts in the plugboard
 def full_pair_combination_gen(plug_board_contacts, n):
     # generate all possible n pairs of letters
     all_full_pair_comb = itertools.combinations(itertools.combinations(plug_board_contacts, 2), n)
-    bBrake = False
-    bOut = False
     # iterate over the possible combination and only yield the ones where no contacts are repeated.
     for pair in all_full_pair_comb:
         if len(set("".join([x + y for x, y in pair]))) == n * 2:
             yield pair
 
 
-# generator which yields all possible reflector wiring combinations by swapping n pairs of contacts
+# Generator which yields all possible reflector wiring combinations by swapping n pairs of contacts
 def reflector_wiring_comb_gen(std_wiring, n):
     # On the first call return the standard wiring
     yield std_wiring
@@ -497,31 +492,30 @@ def reflector_wiring_comb_gen(std_wiring, n):
         lc = all_left_contacts[idx]
         if lc in all_right_contacts_unique:
             continue
-        # list that contains the reflector contacts which receive the input char
+        # List that contains the reflector contacts which receive the input char
         all_right_contacts_unique.append(rc)
-        # list that contains the respective contacts the input char is mapped to by the reflector
+        # List that contains the respective contacts the input char is mapped to by the reflector
         all_left_contacts_unique.append(lc)
-    # generate all possible combination of right contact to swap
+    # Generate all possible combination of right contact to swap
     right_contact_to_swap_comb = itertools.combinations(all_right_contacts_unique, n)
     for right_contacts_list in right_contact_to_swap_comb:
         # Only swap wires in pairs
-        N = 2
-        if n < 3:
-            N = 1
-        right_contacts_pairs_comb = full_pair_combination_gen(right_contacts_list, N)
+        if n % 2 == 1:
+            raise ValueError("Pairs of contacts to swap must be an even number")
+        right_contacts_pairs_comb = full_pair_combination_gen(right_contacts_list, n // 2)
         for right_contact_pairs in right_contacts_pairs_comb:
             # Pre create a copy of the input wiring which will be later on modified with the new contact pairs
             new_wiring = std_wiring.copy()
             new_left_contact_pairs = []
-            # iterate over the possible right pairs
+            # Iterate over the possible right pairs
             for a_right_contact_pair in right_contact_pairs:
-                # find the correspondent left contact
+                # Find the correspondent left contact
                 this_wire_pair_left_contact = [y for (y, x) in std_wiring if x in a_right_contact_pair]
-                # swap the left contacts
+                # Swap the left contacts
                 new_left_contact_pairs.append((this_wire_pair_left_contact[1], this_wire_pair_left_contact[0]))
-            # merge the right contact pairs with the swapped left contact pairs
+            # Merge the right contact pairs with the swapped left contact pairs
             new_connections = list(zip(join_iterable_2_tuple(new_left_contact_pairs), join_iterable_2_tuple(right_contact_pairs)))
-            # replace old connections with new ones in new_wiring
+            # Replace old connections with new ones in new_wiring
             for conn in new_connections:
                 left_cont, right_cont = conn
                 idx = Rotor.char2num_static(right_cont)
@@ -529,47 +523,8 @@ def reflector_wiring_comb_gen(std_wiring, n):
                 new_wiring[idx] = conn
                 idx_complementary = Rotor.char2num_static(left_cont)
                 new_wiring[idx_complementary] = conn[1], conn[0]
-            # from the second call onwards return the modified wiring
+            # From the second call onwards return the modified wiring
             yield new_wiring
-
-
-def reflector_wiring_comb_gen2(std_wiring, n):
-    # On the first call return the standard wiring
-    yield std_wiring
-    all_right_contacts = [x for (_, x) in std_wiring]
-    all_left_contacts = [y for (y, _) in std_wiring]
-    all_right_contacts_unique = []
-    all_left_contacts_unique = []
-    for idx, rc in enumerate(all_right_contacts):
-        lc = all_left_contacts[idx]
-        if lc in all_right_contacts_unique:
-            continue
-        # list that contains the reflector contacts which receive the input char
-        all_right_contacts_unique.append(rc)
-        # list that contains the respective contacts the input char is mapped to by the reflector
-        all_left_contacts_unique.append(lc)
-    # generate all possible combination of right contact to swap
-    right_contact_to_swap_comb = itertools.combinations(all_right_contacts_unique, n)
-    for right_contacts_list in right_contact_to_swap_comb:
-        # Only swap wires in pairs
-        if n % 2 == 1:
-            raise ValueError
-        right_contacts_pairs_comb = full_pair_combination_gen(right_contacts_list, n // 2)
-        for right_contact_pairs in right_contacts_pairs_comb:
-            # Pre create a copy of the input wiring which will be later on modified with the new contact pairs
-            new_wiring = std_wiring.copy()
-            new_left_contact_pairs = []
-            # iterate over the possible right pairs
-            for a_right_contact_pair in right_contact_pairs:
-                # find the correspondent left contact
-                this_wire_pair_left_contact = [y for (y, x) in std_wiring if x in a_right_contact_pair]
-                # swap the left contacts
-                new_left_contact_pairs.append((this_wire_pair_left_contact[1], this_wire_pair_left_contact[0]))
-            # merge the right contact pairs with the swapped left contact pairs
-            new_connections = list(zip(join_iterable_2_tuple(new_left_contact_pairs), join_iterable_2_tuple(right_contact_pairs)))
-            # from the second call onwards return the modified wiring
-            yield new_connections
-
 
 
 def join_iterable_2_tuple(iterable):
@@ -579,7 +534,7 @@ def join_iterable_2_tuple(iterable):
     return out
 
 
-# helper function which prints the results
+# Helper function which prints the results
 def print_results(solution, t_elapsed, n):
     bfound, crakedstring, score, settings = solution
     if bfound:
@@ -596,10 +551,6 @@ def print_results(solution, t_elapsed, n):
     print(f"Code {n} execution time: {round(t_elapsed, 3)} seconds\n")
 
 
-
-
-
 if __name__ == '__main__':
 
     CodeBreaking.all_codes()
-

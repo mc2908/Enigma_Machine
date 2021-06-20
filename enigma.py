@@ -1,4 +1,3 @@
-from rotor import *
 from plugboard import *
 from pluglead import *
 from rotorscase import *
@@ -9,7 +8,8 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-class EnigmaMachine:
+
+class EnigmaMachine():
 
     def __init__(self):
         self.plugboard = Plugboard()        # Plugboard object is a container of Pluglead objects
@@ -17,10 +17,10 @@ class EnigmaMachine:
         self.reflector = None               # Reflector object
 
     # Insert plug leads
-    #mapping = ["AB", "CF", "JD"....]
+    # mapping = ["AB", "CF", "JD"....]
     def insert_plugleads(self, mapping):
         if type(mapping) != list:
-            raise TypeError(" Plug lads mapping must be specified os list of strings e.g. ['AB', 'CF', 'JD',....]")
+            raise TypeError(" Plug leads connections must be specified os list of strings e.g. ['AB', 'CF', 'JD',....]")
         for pairs in mapping:
             self.plugboard.add(PlugLead(pairs))
 
@@ -30,14 +30,16 @@ class EnigmaMachine:
     # Insert rotors
     def add_rotors(self, names):
         if type(names) != list:
-            raise TypeError("Rotor names must be specified by a list of names e.g. ['I', 'II', 'III']")
+            raise TypeError("Rotor names must be specified by a list of string e.g. ['I', 'II', 'III']")
+        # remove all previously added rotors before inserting new ones
+        self.remove_all_rotors()
         # Reversing the list because the names list exactly represent the rotor location.
         # The last element in the list is the rightmost rotor which  in turns needs to be added as the first one
         names.reverse()
         for name in names:
             # creating the rotor object
-            rotor = rotor_from_name(name)
-            self.rotorcase.add(rotor)
+            this_rotor = rotor_from_name(name)
+            self.rotorcase.add(this_rotor)
 
     def set_rotors_initial_pos(self, initial_positions):
         if type(initial_positions) != list:
@@ -70,7 +72,7 @@ class EnigmaMachine:
 
     def encode(self, message_in):
         if not self.check_machine_components():
-            raise SystemError("Enigma Machine is not property set up. Check your inputs")
+            raise SystemError("The Enigma Machine is not property set up. Check your inputs")
         # check that all components of the enigma machine are properly set up
         message_in = utility.check_input_message_formatting(message_in, "Input Message")
         message_out = ""
@@ -102,46 +104,44 @@ class EnigmaMachine:
     # Method to plot Enigma machine time complexity from input size varying from  1 to "n" with step size "step"
     # To average the measurements noise, each  measurement  is taken "rep" time for a single string of lenght x.
     @staticmethod
-    def time_complexity(n,step,rep):
-
-        em0 = EnigmaMachine()
-        em0.add_rotors(["I", "II", "III", "IV"])
-        em0.set_rotors_initial_pos(["A", "A", "Z", "A"])
-        em0.set_rotors_ring_setting([1, 1, 1, 1])
-        em0.add_reflector("B")
+    def time_complexity(n, step, rep):
+        em = EnigmaMachine()
+        em.add_rotors(["I", "II", "III", "IV"])
+        em.set_rotors_initial_pos(["A", "A", "Z", "A"])
+        em.set_rotors_ring_setting([1, 1, 1, 1])
+        em.add_reflector("B")
         string = ""
         nchar_arr = np.zeros(n // step)
         time_arr = np.zeros(n // step)
         for i in range(0, n//step, 1):
             string = string + "".join([Rotor.num2Char_static(random.randint(0, 25)) for _ in range(step)])
-            #string = string + "".join(["A" for _ in range(2)])
             t_tot = 0
             for _ in range(rep):
                 em0.reset_default_rotor_position()
                 t_start = time.time()
-                _ = em0.encode(string)
+                _ = em.encode(string)
                 t_elapsed = time.time() - t_start
                 t_tot = t_tot + t_elapsed
             t_avg = t_tot / rep
             time_arr[i] = round(t_avg * 10**3, 3)  # time in ms
             nchar_arr[i] = step * (i+1)
-        fig, ax = plt.subplots()  # Create a figure and an axes.
-        avg_time_arr = utility.moving_avarage(time_arr, len(time_arr)//10) # moving average with a window width 10% of the length of time_arr
-        ax.plot(nchar_arr, time_arr)  # Plot  measurements on the axes.
-        ax.plot(nchar_arr, avg_time_arr)  # Plot moving average on the axes
-
-        ax.set_xlabel('Input string length [num of letters]')  # Add an x-label to the axes.
-        ax.set_ylabel('Time [ms]')  # Add a y-label to the axes.
-        ax.set_title("Enigma Machine Time complexity")  # Add a title to the axes.
+        # Create a figure and an axes.
+        fig, ax = plt.subplots()
+        # moving average with a window width 10% of the length of time_arr
+        avg_time_arr = utility.moving_average(time_arr, len(time_arr)//10)
+        # Plot  measurements on the axes.
+        ax.plot(nchar_arr, time_arr)
+        # Plot moving average on the axes
+        ax.plot(nchar_arr, avg_time_arr)
+        ax.set_xlabel('Input string length [num of letters]')
+        ax.set_ylabel('Time [ms]')
+        ax.set_title("Enigma Machine Time complexity")
         plt.show()
-
-
 
 
 if __name__ == '__main__':
 
-    EnigmaMachine.time_complexity(2000,10,20)
-
+    # Test correct encoding
 
     em0 = EnigmaMachine()
     em0.add_rotors(["I", "II", "III"])
@@ -149,8 +149,7 @@ if __name__ == '__main__':
     em0.set_rotors_ring_setting([1, 1, 1])
     em0.add_reflector("B")
     encoded_string = em0.encode("A")
-    print(encoded_string)
-
+    print(f"A has been encoded to {encoded_string}")
 
     em1 = EnigmaMachine()
     em1.add_rotors(["I", "II", "III"])
@@ -158,8 +157,7 @@ if __name__ == '__main__':
     em1.set_rotors_ring_setting([1, 1, 1])
     em1.add_reflector("B")
     encoded_string = em1.encode("A")
-    print(encoded_string)
-
+    print(f"A has been encoded to {encoded_string}")
 
     em2 = EnigmaMachine()
     em2.add_rotors(["I", "II", "III"])
@@ -167,8 +165,7 @@ if __name__ == '__main__':
     em2.set_rotors_ring_setting([1, 1, 1])
     em2.add_reflector("B")
     encoded_string = em2.encode("A")
-    print(encoded_string)
-
+    print(f"A has been encoded to {encoded_string}")
 
     em3 = EnigmaMachine()
     em3.add_rotors(["IV", "V", "Beta"])
@@ -176,7 +173,7 @@ if __name__ == '__main__':
     em3.set_rotors_ring_setting([14, 9, 24])
     em3.add_reflector("B")
     encoded_string = em3.encode("H")
-    print(encoded_string)
+    print(f"H has been encoded to {encoded_string}")
 
     em4 = EnigmaMachine()
     em4.add_rotors(["I", "II", "III", "IV"])
@@ -184,9 +181,7 @@ if __name__ == '__main__':
     em4.set_rotors_ring_setting([7, 11, 15, 19])
     em4.add_reflector("C")
     encoded_string = em4.encode("Z")
-    print(encoded_string)
-
-
+    print(f"Z has been encoded to {encoded_string}")
 
     em5 = EnigmaMachine()
     em5.add_rotors(["I", "II", "III"])
@@ -195,8 +190,7 @@ if __name__ == '__main__':
     em5.add_reflector("B")
     em5.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
     encoded_string = em5.encode("HELLOWORLD")
-    print(encoded_string)
-
+    print(f"The encoded message is {encoded_string}")
 
     em6 = EnigmaMachine()
     em6.add_rotors(["IV", "V", "Beta", "I"])
@@ -205,5 +199,11 @@ if __name__ == '__main__':
     em6.add_reflector("A")
     em6.insert_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
     encoded_string = em6.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
-    print(encoded_string)
+    print(f"The encoded message is {encoded_string}")
+
+
+    # EnigmaMachine.time_complexity(2000,10,20)
+
+
+    # Test wrong inputs
 
