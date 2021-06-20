@@ -482,8 +482,6 @@ def full_pair_combination_gen(plug_board_contacts, n):
 
 # Generator which yields all possible reflector wiring combinations by swapping n pairs of contacts
 def reflector_wiring_comb_gen(std_wiring, n):
-    # On the first call return the standard wiring
-    yield std_wiring
     all_right_contacts = [x for (_, x) in std_wiring]
     all_left_contacts = [y for (y, _) in std_wiring]
     all_right_contacts_unique = []
