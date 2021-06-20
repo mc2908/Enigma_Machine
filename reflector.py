@@ -25,27 +25,35 @@ class Reflector:
         self.wiring = dict(get_wiring_by_ReflectorType(self.eType))
         self.wiring_type = WiringType.Std
 
+    # find the swapped pairs in the reflector with respect to the standard wiring
     def find_wiring_changes(self):
         if self.wiring_type == WiringType.Std:
+            # no changes, return an empty list
             return []
-        std_wiring = set(get_wiring_by_ReflectorType(self.wiring_type))
-        mod_wiring = set(self.wiring.items())
-        mod_wiring.difference_update(std_wiring)
-        mod_wiring = list(mod_wiring)
-        for x, y in mod_wiring:
-            if (y, x) in mod_wiring:
-                idx = mod_wiring.index((y, x))
-                mod_wiring.pop(idx)
-        mod_wiring = [x+y for x, y in mod_wiring]
-        return mod_wiring
+        std_wiring = get_wiring_by_ReflectorType(self.wiring_type)
+        mod_wiring = self.wiring.items()
+        # find the connections which were modified
+        mod_pairs = [x for x in mod_wiring if x not in std_wiring]
+        # removed complementary pairs
+        for x, y in mod_pairs:
+            if (y, x) in mod_pairs:
+                idx = mod_pairs.index((y, x))
+                mod_pairs.pop(idx)
+        mod_pairs = [x+y for x, y in mod_pairs]
+        return mod_pairs
 
+    # two reflector are equal if they are of the same type
+    def __eq__(self, other):
+        return self.eType == other.eType
+
+# # Enumerator class to identify reflector
 class ReflectorType(Enum):
     ND = 0
     A = 1
     B = 2
     C = 3
 
-
+# Enumerator class to identify if a reflector's wiring has been manually modified or not
 class WiringType(Enum):
     ND = 0
     Std = 1

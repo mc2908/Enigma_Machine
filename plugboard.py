@@ -14,8 +14,6 @@ class Plugboard:
         # Two or more identical plug leads cannot exist
         if a_pluglead in self.plugleads:
             raise ValueError(" 1 or more pluglead contacts are already in use. Check your inputs")
-        # Two or more plugleads cannot have the same keys
-        # TODO
         self.plugleads.append(a_pluglead)
         self.num_plugleads += 1
 

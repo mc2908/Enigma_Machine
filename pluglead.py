@@ -6,13 +6,13 @@ class PlugLead:
     def __init__(self, mapping):
         # The input mapping must be a string
         if type(mapping) != str:
-            raise TypeError("Plug lead must be defined by string")
+            raise TypeError("Plug lead input must be of string type")
         # And must have length 2
         if len(mapping) != 2:
             raise ValueError("Each plug lead must be specified by two capital case character from A to Z")
         # Make sure that each element is a valid plug board contact
         if mapping[0] not in self.contacts or mapping[1] not in self.contacts:
-            raise ValueError("Specified Plug Lead contacts do not exist")
+            raise ValueError(f"Specified Plug Lead contacts ({mapping[0] + mapping[1] }) do not exist")
         from_char = mapping[0]
         to_char = mapping[1]
         # Create a dictionary with back and forth mapping

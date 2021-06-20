@@ -11,11 +11,11 @@ def check_input_message_formatting(message: str, message_type):
     message_formatted = "".join(message_temp)
     # check if characters have been removed from the input string
     if len(message_formatted) != len(message):
-        warnings.warn(message_type + " info: Special characters and/or white spaces have been removed, lowercase characters has been formatted to upper case")
+        warnings.warn(message_type + " info: Special characters and/or white spaces have been removed, lowercase characters has been formatted to UPPERCASE")
         return message_formatted
     # check if the output sting has been modified respect to the input string
     if message_formatted != message:
-        warnings.warn(message_type + "info : Lowercase characters has been formatted to upper case")
+        warnings.warn(message_type + "info : Lowercase characters has been formatted to UPPERCASE")
     return message_formatted
 
 

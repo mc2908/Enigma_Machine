@@ -64,16 +64,15 @@ class EnigmaMachine():
             raise ValueError(f"One reflector has already been added, to swap reflector use: replace_reflector(name) instead")
         self.reflector = reflector_from_name(name)
 
-    # Replace existing reflector with a new one. Optionally a custom wiring can also be specified.
-    def replace_reflector(self, name, *args):
+    # Replace existing reflector with a new one
+    def replace_reflector(self, name):
         self.reflector = reflector_from_name(name)
-        if len(args) == 1:
-            self.reflector.wiring = args[0]
 
     def encode(self, message_in):
+        # check that all components of the enigma machine are properly set up
         if not self.check_machine_components():
             raise SystemError("The Enigma Machine is not property set up. Check your inputs")
-        # check that all components of the enigma machine are properly set up
+        # Check the formatting of the input message
         message_in = utility.check_input_message_formatting(message_in, "Input Message")
         message_out = ""
         # iteratively loop over the input message and encode one letter at the time
@@ -117,7 +116,7 @@ class EnigmaMachine():
             string = string + "".join([Rotor.num2Char_static(random.randint(0, 25)) for _ in range(step)])
             t_tot = 0
             for _ in range(rep):
-                em0.reset_default_rotor_position()
+                em.reset_default_rotor_position()
                 t_start = time.time()
                 _ = em.encode(string)
                 t_elapsed = time.time() - t_start
@@ -142,7 +141,6 @@ class EnigmaMachine():
 if __name__ == '__main__':
 
     # Test correct encoding
-
     em0 = EnigmaMachine()
     em0.add_rotors(["I", "II", "III"])
     em0.set_rotors_initial_pos(["A", "A", "Z"])
@@ -201,9 +199,6 @@ if __name__ == '__main__':
     encoded_string = em6.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     print(f"The encoded message is {encoded_string}")
 
-
     # EnigmaMachine.time_complexity(2000,10,20)
 
-
-    # Test wrong inputs
 

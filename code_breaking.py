@@ -95,8 +95,8 @@ class CodeBreaking(FrozenClass):
     def set_plugboard_connections(self, connections):
         if type(connections) is not list:
             raise TypeError("Plug board constraints must be a list: e.g. ['AB', 'C?','??','F?']")
-        if len(connections) > 13:
-            raise ValueError("The number constraint cannot be higher than 13 as the Plug Board only accepts 13 plug leads")
+        if len(connections) > 10:
+            raise ValueError("Maximum number of plugleads (10) has been exceeded")
         for plug_lead in connections:
             if type(plug_lead) is not str:
                 raise TypeError("Each plug lead pair must be a string:  e.g. ['AB', 'C?','??','F?']")
