@@ -9,8 +9,8 @@ class Plugboard:
 
     def add(self, a_pluglead):
         # Maximum number of plug leads available is 10
-        if self.num_plugleads > self.max_num_plugleads:
-            raise ValueError(f"Maximum number of plugleads ({self.max_num_plugleads}) connections has been exceeded")
+        if self.num_plugleads >= self.max_num_plugleads:
+            raise ValueError(f"Maximum number of plug leads connections ({self.max_num_plugleads}) has been exceeded")
         # Two or more identical plug leads cannot exist
         if a_pluglead in self.plugleads:
             raise ValueError(" 1 or more pluglead contacts are already in use. Check your inputs")
@@ -29,9 +29,12 @@ class Plugboard:
 
     # Iterate over all plugleads in the plugboard to encode the input char
     def encode(self, char_in):
-        # check that the input character is a valid one
+        # check that the input is a string
+        if not isinstance(char_in, str):
+            raise ValueError(f"{char_in} is not a valid input. Input be an UPPERCASE character between A and Z included")
+        # check that the input character is valid
         if char_in not in self.__contact:
-            raise ValueError(f"{char_in} is not a valid contact. Remember to use capital case letters")
+            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A to Z included")
         char_out = char_in
         for plug_lead in self.plugleads:
             char_out = plug_lead.encode(char_in)
@@ -51,24 +54,34 @@ if __name__ == "__main__":
     plugboard.add(PlugLead("GT"))
     plugboard.add(PlugLead("DV"))
     plugboard.add(PlugLead("KU"))
+    plugboard.add(PlugLead("if"))
 
     assert (plugboard.encode("K") == "U")
     assert (plugboard.encode("A") == "A")
+    assert(plugboard.encode("I") == "F")
 
     # Test wrong inputs
     pb = Plugboard()
-    plugboard.add(PlugLead("AF"))
+    pb.add(PlugLead("AF"))
     try:
-        plugboard.add(PlugLead("AF"))
-        print("Test failed")
+        pb.add(PlugLead("AF"))
+        print("Test1 failed")
     except ValueError:
-        print("Test passed")
+        print("Test1 passed")
 
     try:
-        plugboard.add(PlugLead("AK"))
-        print("Test failed")
+        pb.add(PlugLead("AK"))
+        print("Test2 failed")
     except ValueError:
-        print("Test passed")
+        print("Test2 passed")
+
+    testSet = ["i", "?", 12, [], ""]
+    for i, test in enumerate(testSet):
+        try:
+            pb.encode(test)
+            print(f"Test{i} encode failed")
+        except ValueError:
+            print(f"Test{i} encode passed")
 
 
 

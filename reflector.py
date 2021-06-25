@@ -10,10 +10,12 @@ class Reflector:
         self.eType = etype
 
     def encode(self, char_in):
+        if not isinstance(char_in, str):
+            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A and Z included")
         if char_in not in self.wiring:
-            raise ValueError()
-        out_contact = self.wiring[char_in]
-        return out_contact
+            raise ValueError( f"{char_in} is not a valid input. Input must be an UPPERCASE character from A to Z")
+        char_out = self.wiring[char_in]
+        return char_out
 
     def swap_wiring(self, new_wiring):
         new_wiring_dict = dict(new_wiring)
@@ -65,7 +67,7 @@ def reflectorType_from_name(reflector_name):
         reflector_type = ReflectorType.A
     elif reflector_name == "B":
         reflector_type = ReflectorType.B
-    elif reflector_name == "C":  # must be C
+    elif reflector_name == "C":
         reflector_type = ReflectorType.C
     else:
         raise ValueError(f"Reflector {reflector_name} does not exist")

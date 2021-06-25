@@ -5,8 +5,9 @@ class PlugLead:
 
     def __init__(self, mapping):
         # The input mapping must be a string
-        if type(mapping) != str:
+        if not isinstance(mapping, str):
             raise TypeError("Plug lead input must be of string type")
+        mapping = mapping.upper()
         # And must have length 2
         if len(mapping) != 2:
             raise ValueError("Each plug lead must be specified by two capital case character from A to Z")
@@ -18,12 +19,17 @@ class PlugLead:
         # Create a dictionary with back and forth mapping
         self.letter_encode = {from_char: to_char, to_char: from_char}
 
-    def encode(self, character):
-        out_character = character
+    def encode(self, char_in):
+        # check input
+        if not isinstance(char_in,str):
+            raise ValueError("Plug lead input must be of string type")
+        if char_in not in self.contacts:
+            raise ValueError( f"{char_in} is not a valid input. Input must be an UPPERCASE character from A to Z")
+        char_out = char_in
         # If the plug lead connects the input char then map it to the other end of the lead.
-        if character in self.letter_encode:
-            out_character = self.letter_encode[character]
-        return out_character
+        if char_in in self.letter_encode:
+            char_out = self.letter_encode[char_in]
+        return char_out
 
     def __eq__(self, other):
         return any(x == y for x, y in zip(self.letter_encode.keys(), other.letter_encode.keys())) or\
@@ -41,24 +47,38 @@ if __name__ == "__main__":
     assert (lead.encode("A") == "D")
     assert (lead.encode("D") == "A")
 
+
+    lead = PlugLead("aF")
+    assert (lead.encode("a") == "F")
+
     # Test wrong inputs
     try:
         lead = PlugLead(2343)
-        print("Test failed")
+        print("Test1 failed")
     except TypeError:
-        print("Test passed")
+        print("Test1 passed")
 
     try:
         lead = PlugLead("2343")
-        print("Test failed")
+        print("Test2 failed")
     except ValueError:
-        print("Test passed")
+        print("Test2 passed")
 
     try:
         lead = PlugLead("&*")
-        print("Test failed")
+        print("Test3 failed")
     except ValueError:
-        print("Test passed")
+        print("Test3 passed")
+
+    lead = PlugLead("AF")
+    testSet = ["i", "?", 12, [], ""]
+    for i, test in enumerate(testSet):
+        try:
+            lead.encode(test)
+            print(f"Test{i} encode failed")
+        except ValueError:
+            print(f"Test{i} encode passed")
+
 
 
 # You can use this section to write tests and demonstrations of your enigma code.
