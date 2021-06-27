@@ -21,8 +21,11 @@ class Rotor:
 
     # Set rotor initial position
     def set_initial_position(self, s_pos):
-        if s_pos not in self.wiring[0].keys():
-            raise ValueError(f"Rotor initial position {s_pos} does not exist. Please select a letter between A - Z")
+        # Input validation
+        if not isinstance(s_pos, str) or s_pos not in self.wiring[0].keys():
+            raise ValueError(
+                f"{s_pos} is not a valid initial position. Rotor initial position must be specified as an"
+                f" UPPERCASE character between A and Z included")
         self.pos = self.char2num(s_pos)
         self.default_pos = self.char2num(s_pos)
 
@@ -30,19 +33,11 @@ class Rotor:
     def reset_to_default(self):
         self.pos = self.default_pos
 
-    # Set the rotor ring setting. it can either be defined as integer {1-26} or string {A-Z}
+    # Set the rotor ring setting.
     def set_ring_setting(self, val):
-        if type(val) is int:
-            self.set_ring_setting_int(val)
-        else:
-            raise TypeError("Ring setting can only be defined as an integer value from 1 to 26 included")
-
-    # Set the rotor ring setting from an integer input
-    def set_ring_setting_int(self, val):
-        if 1 <= val <= 26:
-            self.ringSet = val - 1
-        else:
-            raise ValueError(f"Ring setting {val} does not exist. Please enter an integer number between 1 and 26 included")
+        if not isinstance(val, int) or val < 1 or val > 26:
+            raise ValueError(f"{val} is not a valid Ring Setting. Please enter an integer number between 1 and 26 included")
+        self.ringSet = val - 1
 
     # Method to make the rotor rotate of one position
     def rotate(self):
@@ -237,17 +232,17 @@ if __name__ == '__main__':
 
     testSet = ["i", "?", 12, [], ""]
 
-    Rotor = rotor_from_name("I")
+    r = rotor_from_name("I")
     for i, test in enumerate(testSet):
         try:
-            Rotor.encode_right_to_left(test)
+            r.encode_right_to_left(test)
             print(f"Test{i} encode_right_to_left failed")
         except ValueError:
             print(f"Test{i} encode_right_to_left passed")
 
     for i, test in enumerate(testSet):
         try:
-            Rotor.encode_left_to_right(test)
+            r.encode_left_to_right(test)
             print(f"Test{i} encode_left_to_right failed")
         except ValueError:
             print(f"Test{i} encode_left_to_right passed")
