@@ -71,7 +71,7 @@ class EnigmaMachine:
     def encode(self, message_in):
         # check that all components of the enigma machine are properly set up
         if not self.check_machine_components():
-            raise SystemError("The Enigma Machine is not property set up. Check your inputs")
+            raise ValueError("The Enigma Machine is not property set up. Check your inputs")
         # Check the formatting of the input message
         message_in = utility.check_input_message_formatting(message_in, "Input Message")
         message_out = ""

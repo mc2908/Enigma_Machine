@@ -2,6 +2,7 @@ import warnings
 
 # helper method to check the formatting of a input message
 def check_input_message_formatting(message: str, message_type):
+    warnings.filterwarnings('always', '.*info.*', )  # always display warnings
     if type(message) is not str:
         raise TypeError(message_type + " must be a string")
     # make the input string upper case
