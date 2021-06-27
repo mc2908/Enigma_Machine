@@ -1,5 +1,4 @@
 from enum import Enum
-import utility
 
 
 class Reflector:
@@ -10,10 +9,9 @@ class Reflector:
         self.eType = etype
 
     def encode(self, char_in):
-        if not isinstance(char_in, str):
+        # Input Validation
+        if not isinstance(char_in, str) or char_in not in self.wiring:
             raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A and Z included")
-        if char_in not in self.wiring:
-            raise ValueError( f"{char_in} is not a valid input. Input must be an UPPERCASE character from A to Z")
         char_out = self.wiring[char_in]
         return char_out
 
@@ -48,12 +46,14 @@ class Reflector:
     def __eq__(self, other):
         return self.eType == other.eType
 
+
 # # Enumerator class to identify reflector
 class ReflectorType(Enum):
     ND = 0
     A = 1
     B = 2
     C = 3
+
 
 # Enumerator class to identify if a reflector's wiring has been manually modified or not
 class WiringType(Enum):

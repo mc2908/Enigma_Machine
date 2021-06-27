@@ -69,47 +69,40 @@ class Rotor:
     def is_fourth_rotor(self):
         return self.location == 3
 
-    # encode a letter in the forward direction (right to left). Char_in is the input coming for the previous element(rotor/ reflector/plugboard)
+    # Encode a letter in the forward direction (right to left).
+    # Char_in is the input coming for the previous element(rotor/ reflector/plugboard)
     def encode_right_to_left(self, char_in):
-        # check that the input is a string
-        if not isinstance(char_in, str):
-            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A and Z included")
-        # get the mapping from right to left
-        wiring = self.wiring[0]
         # Input validation
-        if char_in not in wiring.keys(): # testing membership on values rather than keys allows to also handle wrong inputs like list or tuples
-            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character from A and Z")
-        # Get the correct rotor right contact after adjusting rotor alignment for position and ring setting
-        right_contact = self.adjust_rotor_contact_right_to_left(char_in)
+        wiring = self.wiring[0]
+        if not isinstance(char_in, str) or char_in not in wiring.keys():
+            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A and Z included")
+        # Get the correct right contact after adjusting the rotors alignment for position and ring setting
+        right_contact = self.__adjust_rotor_contact_right_to_left(char_in)
         left_contact = wiring[right_contact]
         if self.is_leftmost_rotor():
-            # The last rotor needs to pass adjusted contact information to the reflector because the reflector does not
-            # know anything about the position of the rotors
+            # The leftmost rotor needs to pass the reflector the input contact already adjusted for alignment.
             left_contact = self.num2char((self.char2num(left_contact) - self.pos + self.ringSet) % 26)
         return left_contact
 
-    # Encode a letter in the backward direction (left to right). Char_in is the input coming for the previous element(rotor/ reflector/plugboard)
+    # Encode a letter in the backward direction (left to right).
+    # Char_in is the input coming for the previous element(rotor/ reflector/plugboard)
     def encode_left_to_right(self, char_in: str):
-        # check that the input is a string
-        if not isinstance(char_in, str):
-            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A to Z included")
         # get the mapping from left to right
         wiring = self.wiring[1]
-        # input validation
-        if char_in not in wiring.keys(): # testing membership on values rather than keys allows to also handle wrong inputs like list or tuples
-            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character from A to Z")
-        # Get the correct rotor left contact after adjusting rotor alignment for position and ring setting
-        left_contact = self.adjust_rotor_contact_left_to_right(char_in)
+        # Input Validation
+        if not isinstance(char_in, str) or char_in not in wiring.keys():
+            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A to Z included")
+        # Get the correct left contact after adjusting rotors alignment for position and ring setting
+        left_contact = self.__adjust_rotor_contact_left_to_right(char_in)
         # Fetch the rotor right contact wired to the left one
         right_contact = wiring[left_contact]
         if self.is_rightmost_rotor():
-            # The last rotor needs to pass the adjusted contact information to the reflector because the reflector does
-            # not know anything about the position of the rotors
+            # The right rotor needs to pass the plugboard the input contact already adjusted for alignment.
             right_contact = self.num2char((self.char2num(right_contact) - self.pos + self.ringSet) % 26)
         return right_contact
 
     # Get the right alignment between this rotor and the previous element on the right.
-    def adjust_rotor_contact_right_to_left(self, char_in):
+    def __adjust_rotor_contact_right_to_left(self, char_in):
         right_rotor_pos = 0
         right_rotor_ring_set = 0
         # If this rotor is not the rightmost one, take into account the position and ring setting of the previous rotor
@@ -121,8 +114,8 @@ class Rotor:
         contact = self.num2char(contact_idx)
         return contact
 
-    # Method to get the right alignment between this rotor and the previous element on the left (i.e. rotor/ reflector/ plugboard)
-    def adjust_rotor_contact_left_to_right(self, char_in):
+    # Get the right alignment between this rotor and the previous element on the left (i.e. rotor/ reflector/ plugboard)
+    def __adjust_rotor_contact_left_to_right(self, char_in):
         left_rotor_pos = 0
         left_rotor_ring_set = 0
         # If this rotor is not the leftmost one, take into account the position and ring setting of the previous rotor

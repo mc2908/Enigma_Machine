@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-class EnigmaMachine():
+class EnigmaMachine:
 
     def __init__(self):
         self.plugboard = Plugboard()        # Plugboard object is a container of Pluglead objects
@@ -200,5 +200,3 @@ if __name__ == '__main__':
     print(f"The encoded message is {encoded_string}")
 
     # EnigmaMachine.time_complexity(2000,10,20)
-
-

@@ -9,7 +9,6 @@ class Rotorscase:
         self.num_rotors = 0         # number of added rotors
         self.max_rotors = 4         # number of maximum rotors allowed
         self.min_rotors = 3         # number of minimum rotors allowed
-        self.debug_mode = False
 
     # Add Rotor object. Rotors must be added in right to left order
     def add(self, this_rotor: Rotor):
@@ -36,11 +35,8 @@ class Rotorscase:
             # rotated for this key stroke
             if this_rotor.is_rightmost_rotor() or this_rotor.is_at_notch() and not this_rotor.is_leftmost_rotor() and not this_rotor.has_rotated:
                 this_rotor.rotate()
-            else:
-                # If this rotor could not rotate the remaining ones on the left cannot rotate for sure.
+            else:  # If this rotor could not rotate the remaining ones on the left cannot rotate for sure.
                 return
-            if self.debug_mode:
-                print(f"rotor {this_rotor.eType} is now on position {this_rotor.num2char(this_rotor.pos)}")
 
     def __reset_rotor(self):
         for this_rotor in self.rotors:
@@ -50,12 +46,12 @@ class Rotorscase:
         for this_rotor in self.rotors:
             this_rotor.reset_to_default()
 
-    # Pass the input character through all rotors mappings from right  to left
+    # Pass the input character through all rotor mappings from right to left
     def encode_right_to_left(self, in_char):
         out_char = in_char
         for this_rotor in self.rotors:
             out_char = this_rotor.encode_right_to_left(out_char)
-        # reverse the list to get it ready for encode_left_to_right
+        # reverse the rotors to get them ready for encode_left_to_right
         self.rotors.reverse()
         return out_char
 
@@ -64,10 +60,9 @@ class Rotorscase:
         out_char = in_char
         for this_rotor in self.rotors:
             out_char = this_rotor.encode_left_to_right(out_char)
-        # reverse the list to get it ready for encode_right_to_left
+        # reverse the rotors to get them ready for encode_right_to_left
         self.rotors.reverse()
         return out_char
-
 
     def remove_all_rotors(self):
         self.rotors = []

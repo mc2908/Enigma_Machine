@@ -7,24 +7,22 @@ class PlugLead:
         # The input mapping must be a string
         if not isinstance(mapping, str):
             raise TypeError("Plug lead input must be of string type")
-        mapping = mapping.upper()
         # And must have length 2
         if len(mapping) != 2:
-            raise ValueError("Each plug lead must be specified by two capital case character from A to Z")
+            raise ValueError("Plug leads must be specified by two UPPERCASE characters between A and Z included")
         # Make sure that each element is a valid plug board contact
         if mapping[0] not in self.contacts or mapping[1] not in self.contacts:
-            raise ValueError(f"Specified Plug Lead contacts ({mapping[0] + mapping[1] }) do not exist")
+            raise ValueError(f"Plug Lead contacts ({mapping[0] + mapping[1] }) are not valid "
+                             f"Plug leads must be specified by two UPPERCASE characters between A and Z included")
         from_char = mapping[0]
         to_char = mapping[1]
         # Create a dictionary with back and forth mapping
         self.letter_encode = {from_char: to_char, to_char: from_char}
 
     def encode(self, char_in):
-        # check input
-        if not isinstance(char_in,str):
-            raise ValueError("Plug lead input must be of string type")
-        if char_in not in self.contacts:
-            raise ValueError( f"{char_in} is not a valid input. Input must be an UPPERCASE character from A to Z")
+        # Input validation
+        if not isinstance(char_in, str) or char_in not in self.contacts:
+            raise ValueError(f"{char_in} is not a valid input. Input must be an UPPERCASE character between A and Z included")
         char_out = char_in
         # If the plug lead connects the input char then map it to the other end of the lead.
         if char_in in self.letter_encode:
@@ -47,9 +45,6 @@ if __name__ == "__main__":
     assert (lead.encode("A") == "D")
     assert (lead.encode("D") == "A")
 
-
-    lead = PlugLead("aF")
-    assert (lead.encode("a") == "F")
 
     # Test wrong inputs
     try:
@@ -79,8 +74,3 @@ if __name__ == "__main__":
         except ValueError:
             print(f"Test{i} encode passed")
 
-
-
-# You can use this section to write tests and demonstrations of your enigma code.
-#   pluglead1 = PlugLead("AS")
-#   print(pluglead1.encode("T"))
