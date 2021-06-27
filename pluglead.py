@@ -12,7 +12,7 @@ class PlugLead:
             raise ValueError("Plug leads must be specified by two UPPERCASE characters between A and Z included")
         # Make sure that each element is a valid plug board contact
         if mapping[0] not in self.contacts or mapping[1] not in self.contacts:
-            raise ValueError(f"Plug Lead contacts ({mapping[0] + mapping[1] }) are not valid "
+            raise ValueError(f"Plug Lead contacts ({mapping[0] + mapping[1] }) are not valid. "
                              f"Plug leads must be specified by two UPPERCASE characters between A and Z included")
         from_char = mapping[0]
         to_char = mapping[1]

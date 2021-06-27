@@ -13,7 +13,7 @@ class Plugboard:
             raise ValueError(f"Maximum number of plug leads connections ({self.max_num_plugleads}) has been exceeded")
         # Two or more identical plug leads cannot exist
         if a_pluglead in self.plugleads:
-            raise ValueError(" 1 or more pluglead contacts are already in use. Check your inputs")
+            raise ValueError("1 or more pluglead contacts are already in use. Check your inputs")
         self.plugleads.append(a_pluglead)
         self.num_plugleads += 1
 
