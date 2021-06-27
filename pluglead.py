@@ -12,8 +12,10 @@ class PlugLead:
             raise ValueError("Plug leads must be specified by two UPPERCASE characters between A and Z included")
         # Make sure that each element is a valid plug board contact
         if mapping[0] not in self.contacts or mapping[1] not in self.contacts:
-            raise ValueError(f"Plug Lead contacts ({mapping[0] + mapping[1] }) are not valid. "
+            raise ValueError(f"Plug lead contacts ({mapping[0] + mapping[1] }) are not valid. "
                              f"Plug leads must be specified by two UPPERCASE characters between A and Z included")
+        if mapping[0] == mapping[1]:
+            raise ValueError(f"Plug lead {mapping[0] + mapping[1]} is not valid. Contacts cannot be duplicated")
         from_char = mapping[0]
         to_char = mapping[1]
         # Create a dictionary with back and forth mapping
