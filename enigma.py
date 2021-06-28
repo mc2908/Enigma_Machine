@@ -18,7 +18,7 @@ class EnigmaMachine:
 
     # Insert plug leads
     # mapping = ["AB", "CF", "JD"....]
-    def insert_plugleads(self, mapping):
+    def add_plugleads(self, mapping):
         if type(mapping) != list:
             raise TypeError(" Plug leads connections must be specified os list of strings e.g. ['AB', 'CF', 'JD',....]")
         for pairs in mapping:
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     em5.set_rotors_initial_pos(["A", "A", "Z"])
     em5.set_rotors_ring_setting([1, 1, 1])
     em5.add_reflector("B")
-    em5.insert_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
+    em5.add_plugleads(["HL", "MO", "AJ", "CX", "BZ", "SR", "NI", "YW", "DG", "PK"])
     encoded_string = em5.encode("HELLOWORLD")
     print(f"The encoded message is {encoded_string}")
 
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     em6.set_rotors_initial_pos(["E", "Z", "G", "P"])
     em6.set_rotors_ring_setting([18, 24, 3, 5])
     em6.add_reflector("A")
-    em6.insert_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
+    em6.add_plugleads(["PC", "XZ", "FM", "QA", "ST", "NB", "HY", "OR", "EV", "IU"])
     encoded_string = em6.encode("BUPXWJCDPFASXBDHLBBIBSRNWCSZXQOLBNXYAXVHOGCUUIBCVMPUZYUUKHI")
     print(f"The encoded message is {encoded_string}")
 

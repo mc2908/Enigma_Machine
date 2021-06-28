@@ -201,7 +201,7 @@ class CodeBreaking():
             # Remove the previously applied plug leads
             self.__em.remove_plugleads()
             # Insert new ones
-            self.__em.insert_plugleads(plug_setting)
+            self.__em.add_plugleads(plug_setting)
             for this_reflector in self.__reflectors_comb:
                 # Replace reflector
                 self.__em.replace_reflector(this_reflector)
